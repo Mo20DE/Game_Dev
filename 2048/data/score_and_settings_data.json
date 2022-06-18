@@ -1,0 +1,14 @@
+[
+  {
+    "3x3": 144,
+    "4x4": 792,
+    "5x5": 840
+  },
+  {
+    "sound": true,
+    "show_undo": true,
+    "show_ai_menu": false,
+    "how_to": true,
+    "theme": "dark_theme"
+  }
+]
