@@ -43,7 +43,10 @@ class Board:
 
         self.keyPressed = False
         self.tiles_moving = False
+
         self.board_changed = False
+        self.key_lock = False
+        self.anim_move = True
 
         # load necessary board variables
         self.load_board_variables()
@@ -55,12 +58,9 @@ class Board:
         # update game theme
         if theme is not None: self.theme = theme
 
-        # choose board image
-        # initialize all tiles with the proper size
-
+        # choose board image and nitialize all tiles with the proper size
         self.board_img = game_assets[self.theme]["in_game"]["boards"][tile_info[self.dim][1]]
         self.all_available_tiles = game_assets[self.theme]["in_game"]["tiles"][tile_info[self.dim][2]]
-        
         # make an rect of the board image
         self.board_rect = self.board_img.get_rect(topleft=board_pos)
 
@@ -82,26 +82,15 @@ class Board:
                 self.board_info["tile_positions"][str(i)+str(j)] = [x_coord, y_coord]
         
         # save border of the board
-        self.board_info["border"]["left"] = self.board_info["tile_positions"]["00"][0]
-        self.board_info["border"]["right"] = self.board_info["tile_positions"]["0"+str(self.dim-1)][0]+tile_dim[self.dim] #self.board_rect.right - gap_off[self.dim]
-        self.board_info["border"]["top"] = self.board_info["tile_positions"]["00"][1] #self.board_rect.top + gap_off[self.dim]
-        self.board_info["border"]["bottom"] = self.board_info["tile_positions"]["0"+str(self.dim-1)][1] #self.board_rect.bottom - gap_off[self.dim]
+        #self.board_info["border"]["left"] = self.board_info["tile_positions"]["00"][0]
+        #self.board_info["border"]["right"] = self.board_info["tile_positions"]["0"+str(self.dim-1)][0]+tile_dim[self.dim] #self.board_rect.right - gap_off[self.dim]
+        #self.board_info["border"]["top"] = self.board_info["tile_positions"]["00"][1] #self.board_rect.top + gap_off[self.dim]
+        #self.board_info["border"]["bottom"] = self.board_info["tile_positions"]["0"+str(self.dim-1)][1] #self.board_rect.bottom - gap_off[self.dim]
 
         # create 2 random tiles
         if gen_tiles:
             self.generate_tile()
             self.generate_tile()
-    
-    def get_free_fields(self):
-
-        # get all empty fields on board
-        empty_fields = []
-        for i in range(len(self.board)):
-            for j in range(len(self.board)):
-                if self.board[i, j] == 0:
-                    empty_fields.append([i, j])
-
-        return empty_fields
 
     def generate_tile(self):
         
@@ -109,7 +98,8 @@ class Board:
         # choose an empty field for a tile
         new_tile_pos = random.choice(emp_fields)
         # get a random tile
-        random.shuffle(urn)
+        np.random.shuffle(urn)
+        # get a random tile
         tile_num = random.choice(urn)
         # add new tile position to the matrix
         self.board[new_tile_pos[0], new_tile_pos[1]] = tile_num
@@ -127,7 +117,7 @@ class Board:
                 tile_dim[self.dim]), 
                 self.board_info["tile_positions"][idx], 
                 tile_num, self.dim,
-                self.all_available_tiles[str(tile_num)]
+                self.all_available_tiles[str(tile_num)],
         )
     
     # algorithm to shift the board
@@ -244,79 +234,46 @@ class Board:
                 if flag: self.moveBuffer.append([(idx_off-j+2, i), 0]) # start
                 self.moveBuffer[-1][1] = (idx_off-j+3, i) # end
 
-    # check if the game is over
-    def isLost(self, free_fields):
-
-        if len(free_fields) > 0: return False
-
-        mat_T = self.board.T
-        range_x = self.board_dim[0]-1
-
-        # check horizontally
-        # and vertically
-        for i in range(range_x+1):
-            for j in range(range_x):
-                if self.board[i, j] != 0 or mat_T[i, j] != 0:
-                    if self.board[i, j] == self.board[i, j+1]:
-                        return False
-                    if mat_T[i, j] == mat_T[i, j+1]:
-                        return False
-        return True
-    
-    def get_events(self):
-
-        keys = pg.key.get_pressed()
-        if keys[pg.K_UP] or keys[pg.K_w]:
-            self.curr_move = "up"
-
-        elif keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.curr_move = "down"
-
-        elif keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.curr_move = "left"
-
-        elif keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.curr_move = "right"
-            
-        if self.curr_move != None:
-            self.keyPressed = True
-            self.tiles_moving = True
-
     def animate_move(self, move_dir):
 
         for i, pos in enumerate(self.moveBuffer):
 
             tile_idx = str(pos[0][0])+str(pos[0][1])
             dest_pos = str(pos[1][0])+str(pos[1][1])
+
             
             if move_dir == "up" and tile_idx in self.board_tiles:
-                if self.board_tiles[tile_idx].tile_rect.y - self.move_speed > self.board_info["tile_positions"][dest_pos][1]:
-                    self.board_tiles[tile_idx].tile_rect.y -= self.move_speed
+
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.y - self.move_speed > self.board_info["tile_positions"][dest_pos][1]:
+                    self.board_tiles[tile_idx].tile_rect.y = self.board_info["tile_positions"][dest_pos][1]
+                    self.doneTiles.append((i, tile_idx, dest_pos))
                 else:
-                    self.board_tiles[tile_idx].tile_rect.y = self.board_info["tile_positions"][dest_pos][1]
-                    self.doneTiles.append((i, tile_idx, dest_pos))
-
+                    self.board_tiles[tile_idx].tile_rect.y -= self.move_speed
+                
             elif move_dir == "down" and tile_idx in self.board_tiles:
-                if self.board_tiles[tile_idx].tile_rect.y + self.move_speed < self.board_info["tile_positions"][dest_pos][1]:
-                    self.board_tiles[tile_idx].tile_rect.y += self.move_speed
-                else: 
+
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.y + self.move_speed < self.board_info["tile_positions"][dest_pos][1]:
                     self.board_tiles[tile_idx].tile_rect.y = self.board_info["tile_positions"][dest_pos][1]
                     self.doneTiles.append((i, tile_idx, dest_pos))
-
+                else:
+                    self.board_tiles[tile_idx].tile_rect.y += self.move_speed
+            
             elif move_dir == "left" and tile_idx in self.board_tiles:
-                if self.board_tiles[tile_idx].tile_rect.x > self.board_info["tile_positions"][dest_pos][0] + self.move_speed:
+
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.x > self.board_info["tile_positions"][dest_pos][0] + self.move_speed:
+                    self.board_tiles[tile_idx].tile_rect.x = self.board_info["tile_positions"][dest_pos][0]
+                    self.doneTiles.append((i, tile_idx, dest_pos))
+                else:
                     self.board_tiles[tile_idx].tile_rect.x -= self.move_speed
-                else: 
-                    self.board_tiles[tile_idx].tile_rect.x = self.board_info["tile_positions"][dest_pos][0]
-                    self.doneTiles.append((i, tile_idx, dest_pos))
-
+            
             elif move_dir == "right" and tile_idx in self.board_tiles:
-                if self.board_tiles[tile_idx].tile_rect.x < self.board_info["tile_positions"][dest_pos][0] - self.move_speed:
-                    self.board_tiles[tile_idx].tile_rect.x += self.move_speed
-                else: 
+
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.x < self.board_info["tile_positions"][dest_pos][0] - self.move_speed:
                     self.board_tiles[tile_idx].tile_rect.x = self.board_info["tile_positions"][dest_pos][0]
                     self.doneTiles.append((i, tile_idx, dest_pos))
-
+                else:
+                    self.board_tiles[tile_idx].tile_rect.x += self.move_speed
+                
         # update board information        
         self.update_tiles()
     
@@ -353,15 +310,80 @@ class Board:
             if key: return True
         return False
     
+    def get_free_fields(self):
+        # get all empty fields on board
+        return [[i, j] for i in range(self.dim) for j in range(self.dim) if self.board[i, j] == 0]
+    
     def isMoveDone(self):
         return True if len(self.moveBuffer) == 0 else False
     
     def canMove(self):
         return False if np.allclose(self.prev_board, self.board) else True
+
+    # check if the game is over
+    def isLost(self, free_fields):
+
+        if len(free_fields) > 0: return False
+
+        mat_T = self.board.T
+        range_x = self.board_dim[0]-1
+
+        # check horizontally
+        # and vertically
+        for i in range(range_x+1):
+            for j in range(range_x):
+                if self.board[i, j] != 0 or mat_T[i, j] != 0:
+                    if (self.board[i, j] == self.board[i, j+1] 
+                        or mat_T[i, j] == mat_T[i, j+1]):
+                        return False
+        return True
+    
+    def get_events(self):
+
+        if not self.key_lock:
+
+            keys = pg.key.get_pressed()
+            if keys[pg.K_UP] or keys[pg.K_w]:
+                self.curr_move = "up"
+
+            elif keys[pg.K_DOWN] or keys[pg.K_s]:
+                self.curr_move = "down"
+
+            elif keys[pg.K_LEFT] or keys[pg.K_a]:
+                self.curr_move = "left"
+
+            elif keys[pg.K_RIGHT] or keys[pg.K_d]:
+                self.curr_move = "right"
+            
+        if self.curr_move != None:
+            self.keyPressed = True
+            self.tiles_moving = True
     
     def doMove(self):
         # move up or down or left or right
         self.animate_move(self.curr_move)
+
+    def undoMove(self):
+
+        if self.prevMove is not None:
+
+            self.board = self.prevMove.board
+            self.board_tiles = self.prevMove.board_tiles
+            self.score = self.prevMove.score
+            self.moves_done = self.prevMove.moves_done
+
+            self.prev_board_tiles = {}
+            self.moveBuffer = []
+            self.doneTiles = []
+
+            self.game_state = "playing"
+            self.keyPressed = False
+            self.tiles_moving = False
+            self.prev_board = None
+            self.curr_move = None
+            self.prevMove = None
+
+            self.board_changed = True
     
     def restart(self):
 
@@ -389,33 +411,6 @@ class Board:
         self.generate_tile()
         self.generate_tile()
 
-    def undoMove(self):
-
-        if self.prevMove is not None:
-
-            self.board = self.prevMove.board
-            self.board_tiles = self.prevMove.board_tiles
-            '''for key, tile in zip(self.prev_board_tiles.keys(), self.prev_board_tiles.values()):
-                self.board_tiles[key] = BoardTile(
-                    tile.size, self.board_info["tile_positions"][key], tile.num, tile.dim, tile.tile_img
-                )'''
-                
-            self.score = self.prevMove.score
-            self.moves_done = self.prevMove.moves_done
-
-            self.prev_board_tiles = {}
-            self.moveBuffer = []
-            self.doneTiles = []
-
-            self.game_state = "playing"
-            self.keyPressed = False
-            self.tiles_moving = False
-            self.prev_board = None
-            self.curr_move = None
-            self.prevMove = None
-
-            self.board_changed = True
-
     def draw(self, screen):
         
         # draw board
@@ -427,13 +422,12 @@ class Board:
 
     def update(self):
         
+        # reset flag
+        if self.board_changed: self.board_changed = False
+
         # check if game is over
         if self.isLost(self.get_free_fields()):
             self.game_state = "lost"
-        
-        # reset flag
-        if self.board_changed:
-            self.board_changed = False
 
         if self.keyPressed:
             keys = pg.key.get_pressed()
@@ -463,13 +457,13 @@ class Board:
                 self.keyPressed = False
 
         elif self.tiles_moving and not self.keyPressed:
+
             # shift tiles on screen
             self.doMove()
             # check whether move is done
             if self.isMoveDone():
 
-                # check whether game is over
-                # if not generate a new tile
+                #generate a new tile
                 self.generate_tile()
                 self.moves_done += 1
 

@@ -12,11 +12,8 @@ class MainMenu:
 
         # buffer which includes every important data
         self.game_ent = game_ent
-
         # load every needed variable
         self.load_menu_variables()
-        self.prv_font_pos = [list(preview_pos), list(mode_font_pos)]
-        self.new_preview_and_font = []
         
     def load_menu_variables(self, load_buttons=True):
 
@@ -81,17 +78,12 @@ class MainMenu:
     def draw(self, screen):
 
         # draw menu background
-        screen.blit(self.menu_bg, (0,0))
+        screen.blit(self.menu_bg, bg_pos)
 
         # draw start screen
-        screen.blit(self.currentBoardPreview, self.prv_font_pos[0]) # board preview
-        screen.blit(self.currentModeFont, self.prv_font_pos[1]) # mode font
+        screen.blit(self.currentBoardPreview, preview_pos) # board preview
+        screen.blit(self.currentModeFont, mode_font_pos) # mode font
 
-        # draw new preview and mode font if left or right button pressed
-        if self.new_preview_and_font:
-            screen.blit(self.new_preview_and_font[0][0], self.new_preview_and_font[0][1])
-            screen.blit(self.new_preview_and_font[1][0], self.new_preview_and_font[1][1])
-        
         self.menu_btns["start_btn"].blitButton(screen)
         self.menu_btns["left_btn"].blitButton(screen)
         self.menu_btns["right_btn"].blitButton(screen)

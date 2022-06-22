@@ -17,7 +17,7 @@ class MenuesManager:
         
         self.mainM = MainMenu(self.game_ent)
         self.gameM = GameMenu(self.game_ent)
-        self.algoM = AlgoMenu(self.game_ent)
+        self.algoM = AlgoMenu(self.gameM)
         self.settM = SettingsMenu(self.mainM, self.gameM, self.algoM)
     
     def draw_menues(self, screen):
@@ -31,6 +31,8 @@ class MenuesManager:
         elif self.game_ent.game_states["playing"]:
 
             self.gameM.draw(screen)
+            if self.game_ent.sett_vars["show_ai_menu"]:
+                self.algoM.draw(screen)
 
         # draw main menu
         else: self.mainM.draw(screen)
@@ -48,6 +50,8 @@ class MenuesManager:
         elif self.game_ent.game_states["playing"]:
             
             self.gameM.update(mPos)
+            if self.game_ent.sett_vars["show_ai_menu"]:
+                self.algoM.update(mPos)
         
         # update main menu
         else: self.mainM.update(mPos)

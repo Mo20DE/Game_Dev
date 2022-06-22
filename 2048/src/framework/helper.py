@@ -15,7 +15,7 @@ def load_board_data(path_name, theme):
             # open file
             with open(path_name, 'r') as inp:
                 file_content = json.load(inp)
-                if isinstance(file_content, list):
+                if isinstance(file_content, list) and file_content:
                     for board in file_content:
                         # make new board
                         new_board = Board(board["dim"], theme, gen_tiles=False)
@@ -31,7 +31,7 @@ def load_board_data(path_name, theme):
                                 b_data["pos"],
                                 b_data["num"],
                                 b_data["dim"],
-                                new_board.all_available_tiles[b_data["tile_idx"]]
+                                new_board.all_available_tiles[b_data["tile_idx"]],
                             )
                             for tile_idx, b_data in zip(board["board_tiles"].keys(), board["board_tiles"].values())
                         }
@@ -40,12 +40,11 @@ def load_board_data(path_name, theme):
                         #new_board.prev_board = new_board.board
                         #new_board.prev_board_tiles = new_board.board_tiles
                         all_boards[board["mode"]] = new_board
-
                 # close file
                 inp.close()
 
         except Exception as excp:
-            print("Error occured!")
+            print("JSON-error occured: loading board-data!")
             raise excp
 
     return all_boards
@@ -57,12 +56,18 @@ def save_board_data(object, path_name):
         with open(path_name, 'w') as outp:
             for key, board in zip(object.keys(), object.values()):
 
-                board_ = board.board.tolist()
-                board_tiles_ = board.board_tiles
-
                 if board.tiles_moving:
                     board_ = board.prev_board.tolist()
                     board_tiles_ = board.prev_board_tiles
+                    print(board_)
+                    print(board_tiles_)
+                    print("tiles moving")
+                    for tile in board_tiles_.keys():
+                        print(tile)
+                
+                else:
+                    board_ = board.board.tolist()
+                    board_tiles_ = board.board_tiles
 
                 board_info = {
                     "mode": key,
@@ -89,16 +94,18 @@ def save_board_data(object, path_name):
         outp.close()
 
     except Exception as excp:
-        print("Error occured!")
+        print("JSON-error occured: saving board-data!")
         raise excp
 
 def load_b_sc_and_settings(path_name):
 
+    # default best score
     best_scores = {
         "3x3": 0, 
         "4x4": 0, 
         "5x5": 0
     }
+    # default settings
     sett_vars = {
         "sound": True,
         "show_undo": True,
@@ -111,16 +118,16 @@ def load_b_sc_and_settings(path_name):
         try:
             # open file
             with open(path_name, "r") as f:
-                data = json.load(f) or {}
-                f.close()
-
-            if isinstance(data, list):
+                data = json.load(f)
+            if isinstance(data, list) and data:
                 if isinstance(data[0], dict) and isinstance(data[1], dict):
                     best_scores = data[0]
                     sett_vars = data[1]
+            # close file
+            f.close()
         
         except Exception as excp:
-            print("Error occured!")
+            print("JSON-rror occured: loading bestscores and settings!")
             raise excp
     
     return best_scores, sett_vars
@@ -138,6 +145,6 @@ def save_b_sc_and_settings(path_name, best_scores, settings):
         file.close()
     
     except Exception as excp:
-        print("Error occured!")
+        print("JSON-error occured: saving bestscores and settings!")
         raise excp
 
