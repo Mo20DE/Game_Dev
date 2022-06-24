@@ -1,10 +1,7 @@
-from scipy.fftpack import shift
 from menues.gamemenu import GameMenu
 from framework.utils import Keys
-from entities.entities import ButtonsRow
+from entities.entities import Algorithms, ButtonsRow
 from framework.static import *
-import numpy as np
-import random
 
 
 class AlgoMenu:
@@ -20,10 +17,6 @@ class AlgoMenu:
         self.current_time = 0
         self.stop_time = 0
         self.auto_run_time = 0
-        self.moves = [
-            "up", "down", 
-            "left", "right"
-        ]
 
         # object to handle key input
         self.keys = Keys()
@@ -35,9 +28,8 @@ class AlgoMenu:
             active_btn=3, axis=1
         )
 
-        self.samples=2
-        self.depth=5
-        self.speed=100
+        # class that includes algorithms
+        self.algos = Algorithms()
         
         # load every needed variable
         self.load_menu_variables()
@@ -55,142 +47,20 @@ class AlgoMenu:
             "step_btn": game_assets[theme]["algo_menu"]["buttons"]["step_btn"]
         }
     
-    def shift_matrix(self, mat_, move_dir):
-    
-        reward = 0
-        # merge buffer
-        merge_buffer = np.zeros(mat_.shape)
-        # move buffer information
-        mat = mat_.copy()
-
-        # transform matrix for processing
-        if move_dir == "right":
-            mat = mat[::, ::-1]
-        elif move_dir == "up":
-            mat = mat.T
-        elif move_dir == "down":
-            mat = mat.T[::, ::-1]
-        
-        # go through every entry of the board
-        for i, row in enumerate(mat):
-            for j, elem in enumerate(row):
-
-                if j == 0: continue
-                idx_off = 1
-                for _ in range(j):
-
-                    # non-zero element
-                    if elem == 0: break
-                    # zero and non-zero element
-                    offset = j - idx_off
-                    if (mat[i, offset] == 0 and 
-                        merge_buffer[i, offset] != 1):
-                        mat[i, offset] = elem
-                        mat[i, offset+1] = 0
-                        idx_off += 1
-
-                    # two non-zero elements
-                    elif (elem == mat[i, offset] and 
-                        merge_buffer[i, offset] != 1):
-                        merge_buffer[i, offset] = 1
-                        mat[i, offset] = 2*elem
-                        reward += 2*elem
-                        mat[i, offset+1] = 0
-                        idx_off += 1
-
-        # retransform matrix
-        if move_dir == "right":
-            mat = mat[::, ::-1]
-        elif move_dir == "up":
-            mat = mat.T
-        elif move_dir == "down":
-            mat = mat.T[::-1, ::]
-        
-        return mat, reward
-    
-    def get_free_fields(self, bd) -> tuple:
-        # get all empty fields on board
-        dim = bd.shape[0]
-        return [[i, j] for i in range(dim) for j in range(dim) if bd[i, j] == 0]
-
-    def tryInsertTile(self, board) -> bool:
-
-        free_pos = self.get_free_fields(board)
-        # check if there is a free position on the board
-        if len(free_pos) != 0:
-            new_pos = random.choice(free_pos)
-            np.random.shuffle(urn)
-            rand_tile = random.choice(urn)
-            #print(f"Inserted tile: {rand_tile} at position: {new_pos}")
-            board[new_pos[0], new_pos[1]] = rand_tile
-            return True
-
-        return False
-    
-    def getBestGreedyMove(self, board, reward, depth) -> int:
-
-        # recursion anchor
-        if depth == 0 or not self.tryInsertTile(board): 
-            return reward
-        
-        # expand tree
-        sample_data = [
-            self.shift_matrix(board, "up"),
-            self.shift_matrix(board, "down"),
-            self.shift_matrix(board, "left"),
-            self.shift_matrix(board, "right"),
-        ]
-
-        # get newly computed boards
-        boards = [bds[0] for bds in sample_data]
-        # get newly computed rewards
-        rewards = [rwds[1] for rwds in sample_data]
-
-        # take best board, move and reward
-        board = boards[np.argmax(rewards)]
-        reward += np.max(rewards)
-
-        # make recursive call (continue to earch tree)
-        return self.getBestGreedyMove(board, reward, depth-1)
-    
     def on_nn_btn_click(self):
         pass
 
     def on_exp_btn_click(self):
         pass
 
-    def on_greedy_btn_click(self, board, samples, depth):
-
-        '''return self.moves[
-            np.argmax([
-                self.getBestGreedyMove(board, "up", depth),
-                self.getBestGreedyMove(board, "down", depth),
-                self.getBestGreedyMove(board, "left", depth),
-                self.getBestGreedyMove(board, "right", depth)
-            ])
-        ]'''
-
-        first_boards = []
-        rew_samples = np.zeros(4)
-
-        for i, move in enumerate(self.moves):
-            # do first known move
-            brd, reward = self.shift_matrix(board, move)
-            # save data
-            first_boards.append(brd)
-            rew_samples[i] = reward
-
-        for _ in range(samples):
-            rew_samples[0] += self.getBestGreedyMove(first_boards[0], rew_samples[0], depth)
-            rew_samples[1] += self.getBestGreedyMove(first_boards[1], rew_samples[1], depth)
-            rew_samples[2] += self.getBestGreedyMove(first_boards[2], rew_samples[2], depth)
-            rew_samples[3] += self.getBestGreedyMove(first_boards[3], rew_samples[3], depth)
-        
-        return self.moves[np.argmax(rew_samples)]
+    def on_greedy_btn_click(self):
+        # get the best greedy move
+        board = self.gameM.game_ent.boards[self.gameM.game_ent.mode].board
+        return self.algos.greedyStrategy(board=board, samples=5, depth=2)
 
     def on_random_btn_click(self):
         # generate a random move
-        return np.random.choice(self.moves)
+        return self.algos.randomStrategy()
     
     def handleMenuButtonsActions(self, mPos):
 
@@ -233,8 +103,7 @@ class AlgoMenu:
 
             # greedy algorithm
             elif self.toggle_btn_row.getActiveButton() == 2:
-                board = self.gameM.game_ent.boards[self.gameM.game_ent.mode].board
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_greedy_btn_click(board, samples=self.samples, depth=self.depth)
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_greedy_btn_click()
                 self.step_run = False
 
             # random algorithm
@@ -243,7 +112,7 @@ class AlgoMenu:
                 self.step_run = False
         
         # run auto until stop
-        elif self.auto_run and self.current_time - self.auto_run_time > self.speed:
+        elif self.auto_run and self.current_time - self.auto_run_time > self.algos.speed:
 
             # neural network algorithm
             if self.toggle_btn_row.getActiveButton() == 0:
@@ -256,8 +125,7 @@ class AlgoMenu:
             # greedy algorithm
             elif self.toggle_btn_row.getActiveButton() == 2:
                 self.auto_run_time = pg.time.get_ticks()
-                board = self.gameM.game_ent.boards[self.gameM.game_ent.mode].board
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_greedy_btn_click(board, samples=self.samples, depth=self.depth)
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_greedy_btn_click()
 
             # random algorithm
             elif self.toggle_btn_row.getActiveButton() == 3:

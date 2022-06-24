@@ -1,8 +1,6 @@
 import pygame as pg
 from framework.utils import Image, HUDButton, ToggleButton, Colors, Sound
 
-Sound()
-
 
 ################ Main Program Begin ################
 

@@ -7,6 +7,8 @@ import math
 import os
 import numpy as np
 
+os.environ['SDL_VIDEO_CENTERED'] = "True"
+
 pg.display.set_mode()
 pg.display.init()
 

@@ -1,11 +1,11 @@
 [
   {
-    "3x3": 520,
+    "3x3": 528,
     "4x4": 22908,
     "5x5": 525232
   },
   {
-    "sound": false,
+    "sound": true,
     "show_undo": true,
     "show_ai_menu": true,
     "how_to": false,
