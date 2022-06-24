@@ -17,26 +17,28 @@ class GameData:
         # load every board
         self.boards = load_board_data('data/board_data.json', self.sett_vars["theme"])
 
-        self.mode = "4x4" # default level
+        self.mode = "4x4" # default mode
         self.modes = ["3x3", "4x4", "5x5", 1] # every mode and mode index
     
     def changeValue(self, key):
 
         if key == "theme":
+
             if self.sett_vars[key] == "light_theme":
                 self.sett_vars[key] = "dark_theme"
             else: self.sett_vars[key] = "light_theme"
+
         else:
             if self.sett_vars[key]: self.sett_vars[key] = False
             else: self.sett_vars[key] = True
     
     def getButtonStatus(self, key):
 
-        status = None
         if key == "theme":
-            if self.sett_vars[key] == "light_theme":
-                status = "on"
+
+            if self.sett_vars[key] == "light_theme": status = "on"
             else: status = "off"
+            
         else:
             if self.sett_vars[key]: status = "on"
             else: status = "off"

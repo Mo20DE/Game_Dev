@@ -37,6 +37,8 @@ class SettingsMenu:
 
         # load every needed variable
         self.load_menu_variables()
+        # load and set toggle buttons
+        self.setToggleButtons()
 
     def load_menu_variables(self):
         
@@ -47,10 +49,10 @@ class SettingsMenu:
         pg.display.set_icon(game_assets[theme]["game_menu"]["surfaces"]["icon"])
 
         # surfaces
-        self.menu_bg = game_assets[theme]["settings"]["surfaces"]["sett_bg"]
-        self.made_by = game_assets[theme]["settings"]["surfaces"]["made_by"]
-
         self.menu_surf = {
+
+            "menu_bg": game_assets[theme]["settings"]["surfaces"]["sett_bg"],
+            "made_by": game_assets[theme]["settings"]["surfaces"]["made_by"],
 
             "board_msg": {
 
@@ -91,13 +93,6 @@ class SettingsMenu:
             "back_btn": game_assets[theme]["settings"]["buttons"]["back_home_btn"],
 
             "quit_btn": game_assets[theme]["settings"]["buttons"]["quit_btn"],
-
-            "toggle_sound_btn": game_assets[theme]["settings"]["buttons"]["toggle_sound_btn"],
-            "toggle_undo_btn": game_assets[theme]["settings"]["buttons"]["toggle_undo_btn"],
-            "toggle_ai_menu_btn": game_assets[theme]["settings"]["buttons"]["toggle_ai_menu_btn"],
-            "toggle_how_to_btn": game_assets[theme]["settings"]["buttons"]["toggle_how_to_btn"],
-            "toggle_game_theme_btn": game_assets[theme]["settings"]["buttons"]["toggle_game_theme_btn"],
-
             "yes_btn": game_assets[theme]["settings"]["buttons"]["yes_btn"],
             "no_btn": game_assets[theme]["settings"]["buttons"]["no_btn"],
             "ok_btn": game_assets[theme]["settings"]["buttons"]["ok_btn"],
@@ -108,18 +103,34 @@ class SettingsMenu:
             "all_reset_btn": game_assets[theme]["settings"]["buttons"]["all_reset_btn"]
         }
 
-        # set toggle buttons status
-        self.setToggleBtnStatus()
+    def setToggleButtons(self):
+
+        self.toggle_btns = {
+
+            "toggle_sound_btn": toggle_btns["toggle_sound_btn"],
+            "toggle_undo_btn": toggle_btns["toggle_undo_btn"],
+            "toggle_ai_menu_btn": toggle_btns["toggle_ai_menu_btn"],
+            "toggle_how_to_btn": toggle_btns["toggle_how_to_btn"],
+            "toggle_game_theme_btn": toggle_btns["toggle_game_theme_btn"],
+        }
+
+        sett_vars = self.mainM.game_ent
+        # set status of toggle buttons
+        self.toggle_btns["toggle_sound_btn"].set_button_status(sett_vars.getButtonStatus("sound"))
+        self.toggle_btns["toggle_undo_btn"].set_button_status(sett_vars.getButtonStatus("show_undo"))
+        self.toggle_btns["toggle_ai_menu_btn"].set_button_status(sett_vars.getButtonStatus("show_ai_menu"))
+        self.toggle_btns["toggle_how_to_btn"].set_button_status(sett_vars.getButtonStatus("how_to"))
+        self.toggle_btns["toggle_game_theme_btn"].set_button_status(sett_vars.getButtonStatus("theme"))
 
     def setToggleBtnStatus(self):
 
         sett_vars = self.mainM.game_ent
         # set status of toggle buttons
-        self.menu_btns["toggle_sound_btn"].set_button_status(sett_vars.getButtonStatus("sound"))
-        self.menu_btns["toggle_undo_btn"].set_button_status(sett_vars.getButtonStatus("show_undo"))
-        self.menu_btns["toggle_ai_menu_btn"].set_button_status(sett_vars.getButtonStatus("show_ai_menu"))
-        self.menu_btns["toggle_how_to_btn"].set_button_status(sett_vars.getButtonStatus("how_to"))
-        self.menu_btns["toggle_game_theme_btn"].set_button_status(sett_vars.getButtonStatus("theme"))
+        self.toggle_btns["toggle_sound_btn"].set_button_status(sett_vars.getButtonStatus("sound"))
+        self.toggle_btns["toggle_undo_btn"].set_button_status(sett_vars.getButtonStatus("show_undo"))
+        self.toggle_btns["toggle_ai_menu_btn"].set_button_status(sett_vars.getButtonStatus("show_ai_menu"))
+        self.toggle_btns["toggle_how_to_btn"].set_button_status(sett_vars.getButtonStatus("how_to"))
+        self.toggle_btns["toggle_game_theme_btn"].set_button_status(sett_vars.getButtonStatus("theme"))
     
     def reset_menu_variables(self, *args, drm_stage=1, reset_all=False, settings=False):
         
@@ -158,15 +169,13 @@ class SettingsMenu:
         # best score
         else: self.mainM.game_ent.resetData(mode, False)
     
-    def onToggleUndo(self):
-        pass
-    
     def changeGameTheme(self):
         
         # releoad object properties
         self.load_menu_variables()
         self.mainM.load_menu_variables()
         self.gameM.load_menu_variables(reload_boards=True)
+        self.algoM.load_menu_variables()
     
     def drawOne(self, screen, state, key, surf):
 
@@ -299,23 +308,23 @@ class SettingsMenu:
             self.handleMenuCase(case="2.1")
         
         # case 3: sound toggle button clicked
-        elif self.menu_btns["toggle_sound_btn"].isToggleBtnClicked(mPos):
+        elif self.toggle_btns["toggle_sound_btn"].isToggleBtnClicked(mPos):
             self.mainM.game_ent.changeValue("sound")
 
         # case 4: undo toggle button clicked
-        elif self.menu_btns["toggle_undo_btn"].isToggleBtnClicked(mPos):
+        elif self.toggle_btns["toggle_undo_btn"].isToggleBtnClicked(mPos):
             self.mainM.game_ent.changeValue("show_undo")
         
         # case 4: ai menu toggle button clicked
-        elif self.menu_btns["toggle_ai_menu_btn"].isToggleBtnClicked(mPos):
+        elif self.toggle_btns["toggle_ai_menu_btn"].isToggleBtnClicked(mPos):
             self.mainM.game_ent.changeValue("show_ai_menu")
         
         # case 4: how-to toggle button clicked
-        elif self.menu_btns["toggle_how_to_btn"].isToggleBtnClicked(mPos):
+        elif self.toggle_btns["toggle_how_to_btn"].isToggleBtnClicked(mPos):
             self.mainM.game_ent.changeValue("how_to")
 
         # case 5: game theme toggle button clicked
-        elif self.menu_btns["toggle_game_theme_btn"].isToggleBtnClicked(mPos):
+        elif self.toggle_btns["toggle_game_theme_btn"].isToggleBtnClicked(mPos):
             self.mainM.game_ent.changeValue("theme")
             self.changeGameTheme()
         
@@ -378,7 +387,8 @@ class SettingsMenu:
     def draw(self, screen):
 
         # draw menu background
-        screen.blit(self.menu_bg, (0, 0))
+        screen.blit(self.menu_surf["menu_bg"], bg_pos)
+        screen.blit(self.menu_surf["made_by"], made_by_pos)
 
         # draw back button
         self.menu_btns["back_btn"].blitButton(screen)
@@ -389,19 +399,21 @@ class SettingsMenu:
         self.menu_btns["reset_b_sc_btn"].blitButton(screen)
 
         # draw "sound" toggle button
-        self.menu_btns["toggle_sound_btn"].blitButton(screen)
+        self.toggle_btns["toggle_sound_btn"].blitButton(screen)
         # draw "show undo" toggle button
-        self.menu_btns["toggle_undo_btn"].blitButton(screen)
+        self.toggle_btns["toggle_undo_btn"].blitButton(screen)
         #draw "show ai menu" toggle button
-        self.menu_btns["toggle_ai_menu_btn"].blitButton(screen)
+        self.toggle_btns["toggle_ai_menu_btn"].blitButton(screen)
         # draw "how-to" toggle button
-        self.menu_btns["toggle_how_to_btn"].blitButton(screen)
+        self.toggle_btns["toggle_how_to_btn"].blitButton(screen)
         # draw "game theme" toggle button
-        self.menu_btns["toggle_game_theme_btn"].blitButton(screen)
+        self.toggle_btns["toggle_game_theme_btn"].blitButton(screen)
+
+        
 
         # draw menu surfaces
         if any(self.menu_surf_states.values()):
-            draw_alpha(screen, alpha_surf, (0,0), 230, alpha_buffer)
+            draw_alpha(screen, alpha_surf, bg_pos, alpha_val, alpha_buffer)
 
          ### board data ###
         self.drawOne(screen, "show_no_b_data_surf", "board_msg", "all_notf_msg")
@@ -419,12 +431,12 @@ class SettingsMenu:
 
     def update(self, mPos):
 
-        # back button clicked (reset settings menu)
-        if self.menu_btns["back_btn"].isBtnClicked(mPos):
-            self.reset_menu_variables(reset_all=True)
-
         # "delete board" and "reset best score" buttons can be clicked
         if self.del_res_menu_stage == 1:
+
+            # back button clicked (reset settings menu)
+            if self.menu_btns["back_btn"].isBtnClicked(mPos) or self.keys.keyPressed(pg.K_ESCAPE):
+                self.reset_menu_variables(reset_all=True)
 
             self.handleStageOne(mPos)
 

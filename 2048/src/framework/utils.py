@@ -1,12 +1,10 @@
 import pygame as pg
 from pygame import mixer
 
-import math
-import os
-import sys
-
 from abc import ABC, abstractmethod
 
+import math
+import os
 import numpy as np
 
 pg.display.set_mode()
@@ -545,22 +543,6 @@ class Player(pg.sprite.Sprite):
         self.rect.x += self.vel.x
         self.rect.y += self.vel.y
 
-# temporary player class
-class Object(pg.sprite.Sprite):
-    def __init__(self, pos, screen):
-        pg.sprite.Sprite.__init__(self)
-        self.screen = screen
-        self.image = pg.Surface((30,60))
-        self.image.fill((12,122,51))
-
-        self.rect = self.image.get_rect()
-        self.rect.x = pos[0]
-        self.rect.y = pos[1]
-        self.vel = Vec(1,1)
-
-    def update(self):
-        self.rect.x -= self.vel.x
-        self.rect.y += self.vel.y
 
 # Tile class
 class Tile:
@@ -1017,7 +999,6 @@ class ToggleButton:
 
                 else:raise ValueError("At least one list element is no Image!")
             else: raise Exception("Both lists must contain 2 images in each list!")
-
         # incorrect type detected
         else: raise ValueError("img1 or/and img2 are type of unsupported class!")
 
@@ -1041,16 +1022,13 @@ class ToggleButton:
     def set_button_status(self, status):
 
         self.status = status
-        if ((self.status == "on" and self.btn1.isClickCntEven()) or 
-            self.status == "off" and not self.btn1.isClickCntEven()):
+        if ((self.status == "on" and not self.btn1.isClickCntEven()) or 
+            self.status == "off" and self.btn1.isClickCntEven()):
             self.btn1.click_cnt += 1
             if self.btn2 != None: self.btn2.click_cnt += 1
     
     def isButtonActive(self):
         return True if self.status == "on" else False
-    
-    def resetButtonClickd(self):
-        self.btn_clicked = False
     
     def blitButton(self, screen):
 
@@ -1820,6 +1798,7 @@ class TickBox_Container:
             tickbox.draw_tickbox(screen)
 
 
+# keys class
 class Keys:
 
     def __init__(self):
@@ -1870,6 +1849,7 @@ class Colors:
 
     SKYBLUE = (51, 171, 249)
     MIDNIGHTBLUE = (55, 55, 62)
+    LIGHTCREAMBLUE = (95, 99, 124)
 
     GREY = (128, 128, 128)
     DIMGREY = (105, 105, 105)
@@ -1879,31 +1859,41 @@ class Colors:
 
     YELLOW = (255, 204, 0)
     LIGHTYELLOW = (250, 248, 240)
+    LIGHTCREAMYELLOW = (234, 216, 196)
 
+    BEIGEBROWN = (145, 120, 96)
     LIGHTBEIGE = (235, 227, 192)
     DARKBLUEGREY = (147, 148, 151)
 
-# structures Game object 
+
+# Game - Base Class
 class Main(ABC):
     
     def __init__(self, width, height, caption, FPS, bg_color=None, app_icon=None):
 
         self.width = width
         self.height = height
-        self.screen = pg.display.set_mode((self.width, self.height))
-        pg.display.set_caption(caption)
-        self.run = True
-        self.ended = False
         self.FPS = FPS
-        self.clock = pg.time.Clock()
         # background color
-        if bg_color != None:
+        if bg_color is not None:
             self.screen.fill(bg_color)
         # set app icon
-        if app_icon != None:
+        if app_icon is not None:
             pg.display.set_icon(app_icon)
+        
+        self.screen = pg.display.set_mode((self.width, self.height))
+        pg.display.set_caption(caption)
+        self.clock = pg.time.Clock()
+        self.run = True
+
+        # create new game objects
+        self.new()
     
     def new(self):
+        pass
+
+    @abstractmethod
+    def events(self):
         pass
     
     @abstractmethod
@@ -1911,47 +1901,45 @@ class Main(ABC):
         pass
     
     @abstractmethod
-    def events(self):
-        pass
-    
-    @abstractmethod
     def draw(self):
         pass
+    
+    def blit(self, object, pos):
+        self.screen.blit(object, pos)
+    
+    def dp_update(self):
+        pg.display.update()
+    
+    def dp_update_flip(self):
+        pg.display.flip()
+    
+    def dp_update_mode(self, mode):
+        return pg.display.update() if mode == 1 else pg.display.flip()
+    
+    def handle_quit(self, save_fun: callable=None):
 
-    def main_loop(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                if save_fun is not None: 
+                    save_fun()
+                self.run = False
+    
+    # game loop
+    def runGame(self):
+        
+        # this code was old 'main_loop()'
         while self.run:
             self.clock.tick(self.FPS)
             self.events()
             self.update()
             self.draw()
-    
-    def blit(self, object, x, y):
-        self.screen.blit(object, (x, y))
-    
-    def dp_update(self):
-        pg.display.update()
-    
-    def dp_update_mode(self, mode):
-        return pg.display.update() if mode == 1 else pg.display.flip()
-    
-    def handle_quit(self):
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                if self.run:
-                    self.run = False
-                self.ended = True
-                sys.exit()
-    
-    def game_quit(self):
-        return pg.quit()
-    
-    # runs evrything
-    # in the game
-    def runMain(self):
-        while not self.ended:
+        pg.quit()
+
+        # this code was old 'runMain()'
+        '''while not self.ended:
             self.new()
             self.main_loop()
-        self.game_quit()
+        self.game_quit()'''
 
 
 # ------------- utility functions ------------- #

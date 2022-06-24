@@ -1,3 +1,4 @@
+from matplotlib.pyplot import draw
 from framework.utils import *
 from framework.static import *
 from entities.gamedata import GameData
@@ -18,16 +19,13 @@ class GameMenu:
             "no": False
         }
 
-        self.keys = Keys()
-
-        self.load_menu_variables()
-        # flag for showing undo button
-        self.show_undo = True
-        # flag that signalizes that board is moving
-        self.board_changed = False
-
         self.current_time = 0
         self.board_changed_time = 0
+        self.board_changed = False
+        self.canMenuBtnsClick = True
+
+        self.keys = Keys()
+        self.load_menu_variables()
     
     def load_menu_variables(self, reload_boards=False):
 
@@ -35,6 +33,7 @@ class GameMenu:
         theme = self.game_ent.sett_vars["theme"]
         # menu background
         self.menu_bg = game_assets[theme]["main_menu"]["surfaces"]["theme"]
+        self.alpha_surf = alpha_surfs[theme]
 
         # surfaces
         self.menu_surfaces = {
@@ -43,19 +42,22 @@ class GameMenu:
             "score_surf": game_assets[theme]["game_menu"]["surfaces"]["score_frame"],
             "best_score_surf": game_assets[theme]["game_menu"]["surfaces"]["best_score_frame"],
             "restart_game_bg": game_assets[theme]["game_menu"]["surfaces"]["restart_msg_bg"],
-            "game_over_screen": game_assets[theme]["game_menu"]["surfaces"]["game_over_screen"]
+            "goal_sent_surf": game_assets[theme]["game_menu"]["surfaces"][self.get_goal_sentece()],
+            "how_to_play_surf": game_assets[theme]["game_menu"]["surfaces"]["how_to_play"],
+            "game_over_surf": game_assets[theme]["game_menu"]["surfaces"]["game_over_surf"]
         }
 
         # GUI elements
         self.buttons = {
 
-            "home_btn": game_assets[theme]["game_menu"]["buttons"]["home_btn"], # home button
-            "restart_btn": game_assets[theme]["game_menu"]["buttons"]["new_game_short_btn"], # restart/new game button
-            "long_restart_btn": game_assets[theme]["game_menu"]["buttons"]["new_game_long_btn"], # long restart/new game button
-            "undo_btn": game_assets[theme]["game_menu"]["buttons"]["undo_btn"], # undo button
+            "home_btn": game_assets[theme]["game_menu"]["buttons"]["home_btn"],
+            "restart_btn": game_assets[theme]["game_menu"]["buttons"]["new_game_short_btn"],
+            "long_restart_btn": game_assets[theme]["game_menu"]["buttons"]["new_game_long_btn"],
+            "undo_btn": game_assets[theme]["game_menu"]["buttons"]["undo_btn"],
+            "try_again_btn": game_assets[theme]["game_menu"]["buttons"]["try_again_btn"],
 
-            "yes_btn": game_assets[theme]["settings"]["buttons"]["yes_btn"], # yes button
-            "no_btn": game_assets[theme]["settings"]["buttons"]["no_btn"] # no button
+            "yes_btn": game_assets[theme]["settings"]["buttons"]["yes_btn"],
+            "no_btn": game_assets[theme]["settings"]["buttons"]["no_btn"]
         }
 
         # load every board
@@ -63,8 +65,13 @@ class GameMenu:
             for board in self.game_ent.boards.values():
                 board.load_board_variables(theme=theme)
     
-    def checkTileMoving(self):
-        pass
+    def get_goal_sentece(self):
+
+        b_sc = self.game_ent.bestscores[self.game_ent.mode]
+        if b_sc < 2048: return "goal_sent_2048"
+        elif b_sc < 4096: return "goal_sent_4096"
+        elif b_sc < 8192: return "goal_sent_8192"
+        return "goal_sent_16384"
     
     def draw_current_score(self, screen, score):
 
@@ -92,18 +99,16 @@ class GameMenu:
         moves_counter = str(self.game_ent.boards[self.game_ent.mode].moves_done)
         Text(45, 600, moves_counter + " Moves", "Arial", 18, moves_done_color[self.game_ent.sett_vars["theme"]]).draw_text(screen)
     
-    def draw_sentence(self, screen):
-        pass
-        
     def draw(self, screen):
 
         # draw menu background
-        screen.blit(self.menu_bg, (0,0))
+        screen.blit(self.menu_bg, bg_pos)
         
         # draw images
         screen.blit(self.menu_surfaces["icon"], game_icon_pos)
         screen.blit(self.menu_surfaces["score_surf"], score_img_pos)
         screen.blit(self.menu_surfaces["best_score_surf"], best_score_img_pos)
+        screen.blit(self.menu_surfaces["goal_sent_surf"], goal_sent_pos)
 
         # draw buttons
         self.buttons["home_btn"].blitButton(screen)
@@ -120,19 +125,24 @@ class GameMenu:
         self.draw_current_score(screen, score)
         self.draw_best_score(screen, score)
         self.draw_moves_counter(screen)
-        self.draw_sentence(screen)
 
         ### draw current board ###
         self.game_ent.boards[self.game_ent.mode].draw(screen)
 
         # draw game over screen if player lost
         if self.game_ent.boards[self.game_ent.mode].game_state == "lost":
-            screen.blit(self.menu_surfaces["game_over_screen"], (45, 340))
+            draw_alpha(screen, self.alpha_surf, alpha_pos2, alpha_val2, alpha_buffer2)
+            screen.blit(self.menu_surfaces["game_over_surf"], game_over_surf_pos)
+            self.buttons["try_again_btn"].blitButton(screen)
+
+        # draw 'how to play' surface
+        if self.game_ent.sett_vars["how_to"]:
+            screen.blit(self.menu_surfaces["how_to_play_surf"], how_to_pos)
 
         # draw restart menu
         if self.states["restart_menu"]:
 
-            draw_alpha(screen, alpha_surf, (0,0), 230, alpha_buffer)
+            draw_alpha(screen, alpha_surf, bg_pos, alpha_val, alpha_buffer)
             screen.blit(self.menu_surfaces["restart_game_bg"], restart_window_pos)
             self.buttons["yes_btn"].blitButton(screen)
             self.buttons["no_btn"].blitButton(screen)
@@ -140,8 +150,6 @@ class GameMenu:
     def update(self, mPos):
 
         if self.states["restart_menu"]:
-
-            #if self.game_ent.boards[self.game_ent.mode].tiles_moving: self.updateBoard()
 
             if self.buttons["yes_btn"].isBtnClicked(mPos) or self.keys.keyPressed(pg.K_RETURN):
                 self.game_ent.boards[self.game_ent.mode].restart()
@@ -156,10 +164,11 @@ class GameMenu:
             if self.game_ent.boards[self.game_ent.mode].tiles_moving:
                 self.board_changed_time = pg.time.get_ticks()
             
-            if self.current_time - self.board_changed_time > 500:
+            if self.current_time - self.board_changed_time > 500 and self.canMenuBtnsClick:
 
                 # check to go back to home screen
-                if self.buttons["home_btn"].isBtnClicked(mPos):
+                if self.buttons["home_btn"].isBtnClicked(mPos) or self.keys.keyPressed(pg.K_ESCAPE):
+                    # go back to home screen
                     self.game_ent.resetState("playing")
                     # reset previous move if back to home screens
                     self.game_ent.boards[self.game_ent.mode].prevMove = None
@@ -176,10 +185,17 @@ class GameMenu:
                     # check restart button
                     if self.buttons["long_restart_btn"].isBtnClicked(mPos):
                         self.states["restart_menu"] = True
-
+            
             # update board
-            ### update current board ###
-            self.game_ent.boards[self.game_ent.mode].update()
-            # if board changed, save board
-            self.board_changed = self.game_ent.boards[self.game_ent.mode].board_changed
+            if self.game_ent.boards[self.game_ent.mode].game_state != "lost":
+                ### update current board ###
+                self.game_ent.boards[self.game_ent.mode].update()
+                # if board changed, save board
+                self.board_changed = self.game_ent.boards[self.game_ent.mode].board_changed
+                if self.board_changed and self.game_ent.sett_vars["sound"]:
+                    self.game_ent.boards[self.game_ent.mode].make_tile_sound()
+            
+            else:
+                if self.buttons["try_again_btn"].isBtnClicked(mPos):
+                    self.game_ent.boards[self.game_ent.mode].restart()
 
