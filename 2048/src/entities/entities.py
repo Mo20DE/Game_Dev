@@ -5,7 +5,7 @@ from framework.static import *
 # class to represent a board tile
 class BoardTile:
 
-    def __init__(self, size, pos, num, dim, image):
+    def __init__(self, size, pos, num, dim, image, spwn_eff=True):
         
         self.size = size
         self.num = num
@@ -15,7 +15,7 @@ class BoardTile:
         self.tile_img = image
         self.tile_rect = self.tile_img.get_rect(topleft=self.pos)
 
-        self.spawn_effect = True # flag for spawn effect
+        self.spawn_effect = spwn_eff
         self.size_cpy = [self.size[0]-30]*2
         self.spawn_off = 3
         self.tile_center = ((self.pos[0]+(tile_dim[self.dim]/2)), (self.pos[1]+(tile_dim[self.dim]/2)))
@@ -39,7 +39,7 @@ class BoardTile:
     def draw_tile(self, screen):
 
         if self.spawn_effect: self.do_spawn_effect(screen)
-        screen.blit(self.tile_img, self.tile_rect)
+        else: screen.blit(self.tile_img, self.tile_rect)
 
 
 # class which represents a move

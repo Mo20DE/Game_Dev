@@ -42,6 +42,7 @@ class GameMenu:
             "score_surf": game_assets[theme]["game_menu"]["surfaces"]["score_frame"],
             "best_score_surf": game_assets[theme]["game_menu"]["surfaces"]["best_score_frame"],
             "restart_game_bg": game_assets[theme]["game_menu"]["surfaces"]["restart_msg_bg"],
+            "goal_sent_surf": game_assets[theme]["game_menu"]["surfaces"][self.get_goal_sentece()],
             "how_to_play_surf": game_assets[theme]["game_menu"]["surfaces"]["how_to_play"],
             "game_over_surf": game_assets[theme]["game_menu"]["surfaces"]["game_over_surf"]
         }
@@ -63,6 +64,14 @@ class GameMenu:
         if reload_boards:
             for board in self.game_ent.boards.values():
                 board.load_board_variables(theme=theme)
+    
+    def get_goal_sentece(self):
+
+        b_sc = self.game_ent.bestscores[self.game_ent.mode]
+        if b_sc < 2048: return "goal_sent_2048"
+        elif b_sc < 4096: return "goal_sent_4096"
+        elif b_sc < 8192: return "goal_sent_8192"
+        return "goal_sent_16384"
     
     def draw_current_score(self, screen, score):
 
@@ -90,9 +99,6 @@ class GameMenu:
         moves_counter = str(self.game_ent.boards[self.game_ent.mode].moves_done)
         Text(45, 600, moves_counter + " Moves", "Arial", 18, moves_done_color[self.game_ent.sett_vars["theme"]]).draw_text(screen)
     
-    def draw_sentence(self, screen):
-        pass
-        
     def draw(self, screen):
 
         # draw menu background
@@ -102,6 +108,7 @@ class GameMenu:
         screen.blit(self.menu_surfaces["icon"], game_icon_pos)
         screen.blit(self.menu_surfaces["score_surf"], score_img_pos)
         screen.blit(self.menu_surfaces["best_score_surf"], best_score_img_pos)
+        screen.blit(self.menu_surfaces["goal_sent_surf"], goal_sent_pos)
 
         # draw buttons
         self.buttons["home_btn"].blitButton(screen)
@@ -118,7 +125,6 @@ class GameMenu:
         self.draw_current_score(screen, score)
         self.draw_best_score(screen, score)
         self.draw_moves_counter(screen)
-        self.draw_sentence(screen)
 
         ### draw current board ###
         self.game_ent.boards[self.game_ent.mode].draw(screen)
@@ -186,6 +192,8 @@ class GameMenu:
                 self.game_ent.boards[self.game_ent.mode].update()
                 # if board changed, save board
                 self.board_changed = self.game_ent.boards[self.game_ent.mode].board_changed
+                if self.board_changed and self.game_ent.sett_vars["sound"]:
+                    self.game_ent.boards[self.game_ent.mode].make_tile_sound()
             
             else:
                 if self.buttons["try_again_btn"].isBtnClicked(mPos):

@@ -1,5 +1,7 @@
 import pygame as pg
-from framework.utils import Image, HUDButton, ToggleButton, Colors
+from framework.utils import Image, HUDButton, ToggleButton, Colors, Sound
+
+Sound()
 
 
 ################ Main Program Begin ################
@@ -43,6 +45,20 @@ sett_exit_button_size = (90, 46)
 
 
 ################ Game Menu Begin ################
+
+# audio
+sound_effects = {
+    "swipe": Sound("audio/swipe.wav"),
+    "merge_1": Sound("audio/merge_1.wav"),
+    "merge_2": Sound("audio/merge_2.wav"),
+    "merge_3": Sound("audio/merge_3.wav")
+}
+'''audio_dec = [
+    "merge_1", "merge_1", "merge_1",
+    "merge_1", "merge_2", "merge_1",
+    "merge_3", "merge_1", "merge_2",
+    "merge_1", "merge_1", "merge_2"
+]'''
 
 ## GameMenu ##
 game_icon_pos = (40, 40)
@@ -88,14 +104,22 @@ moves_done_color = {
     "dark_theme": Colors.WHITE
 }
 
-how_to_pos = (42, 630)
-how_to_size = (375, 38)
+goal_sent_pos = (38, 182)
+goal_sent_sizes = (
+    (330, 24),
+    (330, 24),
+    (330, 24),
+    (330, 24)
+)
+
+how_to_pos = (25, 630)
+how_to_size = (405, 45)
 
 
 ## board ##
 
 # urn for tile genration
-urn = [2, 2, 2, 4, 2, 2, 2, 2, 4, 2]
+urn = [2, 2, 2, 2, 4, 2, 2, 4, 2, 2]
 
 board_pos = (40, 220) # originally (40, 200)
 board_size = (370, 370)
@@ -123,8 +147,8 @@ align_off = {
 ### in-game constants ###
 tile_info = {
     3: [40, "3x3_board", "3x3_board_tiles"], 
-    4: [40, "4x4_board", "4x4_board_tiles"], 
-    5: [44, "5x5_board", "5x5_board_tiles"]}
+    4: [43, "4x4_board", "4x4_board_tiles"], 
+    5: [46, "5x5_board", "5x5_board_tiles"]}
 
 ################ Game Menu End ################
 
@@ -331,6 +355,7 @@ def load_tiles(dim, theme):
 def generate_theme_assets(theme):
 
     theme_assets = {
+
         "in_game": {
 
             "boards": {
@@ -412,7 +437,12 @@ def generate_theme_assets(theme):
                 "best_score_frame": Image(s_b_img_size[0], s_b_img_size[1])._render_image("img/"+theme+"/game_menu/surfaces/best_score.png", False, True),
                 "restart_msg_bg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/game_menu/surfaces/restart_msg_bg.png", False, True),
                 "how_to_play": Image(how_to_size[0], how_to_size[1])._render_image("img/"+theme+"/game_menu/surfaces/how_to_play.png", False, True),
-                "game_over_surf": Image(game_over_surf_size[0], game_over_surf_size[1])._render_image("img/"+theme+"/game_menu/surfaces/game_over.png", False, True)
+                "game_over_surf": Image(game_over_surf_size[0], game_over_surf_size[1])._render_image("img/"+theme+"/game_menu/surfaces/game_over.png", False, True),
+
+                "goal_sent_2048": Image(goal_sent_sizes[0][0], goal_sent_sizes[0][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_2048.png", False, True),
+                "goal_sent_4096": Image(goal_sent_sizes[1][0], goal_sent_sizes[1][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_4096.png", False, True),
+                "goal_sent_8192": Image(goal_sent_sizes[2][0], goal_sent_sizes[2][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_8192.png", False, True),
+                "goal_sent_16384": Image(goal_sent_sizes[3][0], goal_sent_sizes[3][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_16384.png", False, True)
             },
 
             "buttons": {

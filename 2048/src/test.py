@@ -4,67 +4,138 @@ import numpy as np
 
 # look in every round which is the best move
 
-def shift_matrix(_bd, move_dir):
+def shift_matrix(mat_, move_dir):
     
-    # merge buffer
     reward = 0
-    bd = _bd.copy()
+    # merge buffer
+    merge_buffer = np.zeros(mat_.shape)
+    # move buffer information
+    mat = mat_.copy()
 
     # transform matrix for processing
     if move_dir == "right":
-        bd = bd[::, ::-1]
-
+        mat = mat[::, ::-1]
     elif move_dir == "up":
-        bd = bd.T
-
+        mat = mat.T
     elif move_dir == "down":
-        bd = bd.T[::, ::-1]
+        mat = mat.T[::, ::-1]
     
     # go through every entry of the board
-    for i, row in enumerate(bd):
-        
+    for i, row in enumerate(mat):
         for j, elem in enumerate(row):
 
             if j == 0: continue
-
             idx_off = 1
             for _ in range(j):
 
                 # non-zero element
                 if elem == 0: break
-
                 # zero and non-zero element
                 offset = j - idx_off
-                if bd[i, offset] == 0:
-                    bd[i, offset] = elem
-                    bd[i, offset+1] = 0
+                if (mat[i, offset] == 0 and 
+                    merge_buffer[i, offset] != 1):
+                    mat[i, offset] = elem
+                    mat[i, offset+1] = 0
                     idx_off += 1
-                    
+
                 # two non-zero elements
-                elif elem == bd[i, offset]:
-                    bd[i, offset] = 2*elem
+                elif (elem == mat[i, offset] and 
+                    merge_buffer[i, offset] != 1):
+                    merge_buffer[i, offset] = 1
+                    mat[i, offset] = 2*elem
                     reward += 2*elem
-                    bd[i, offset+1] = 0
+                    mat[i, offset+1] = 0
                     idx_off += 1
-    
+
     # retransform matrix
     if move_dir == "right":
-        bd = bd[::, ::-1]
-
+        mat = mat[::, ::-1]
     elif move_dir == "up":
-        bd = bd.T
-
+        mat = mat.T
     elif move_dir == "down":
-        bd = bd.T[::, ::-1]
+        mat = mat.T[::-1, ::]
     
-    return bd, reward
+    #print(mat)
+    
+    return mat, reward
+
+
+##################################### GREEDY ALGORITHM BEGIN #####################################
+
+def insetTile(self, board):
+
+        free_pos = self.get_free_fields(board)
+        if len(free_pos) != 0:
+            new_pos = random.choice(free_pos)
+            np.random.shuffle(urn)
+            rand_tile = random.choice(urn)
+            #print(f"Inserted tile: {rand_tile} at position: {new_pos}")
+            board[new_pos[0], new_pos[1]] = rand_tile
+            return True
+        return False
+    
+def getBestGreedyMove(self, board, start_move, depth) -> int:
+
+        # do first known move
+        bd, reward = self.shift_matrix(board, start_move)
+
+        if self.insetTile(bd):
+            
+            for _ in range(depth-1):
+
+                sample_infos = [
+                    self.shift_matrix(bd, "up"),
+                    self.shift_matrix(bd, "down"),
+                    self.shift_matrix(bd, "left"),
+                    self.shift_matrix(bd, "right"),
+                ]
+
+                # get new computed board
+                boards = [bds[0] for bds in sample_infos]
+                # get new computed rewards
+                rewards = [rwds[1] for rwds in sample_infos]
+
+                # update board
+                bd = boards[np.argmax(rewards)]
+                reward += np.max(rewards)
+                if not self.insetTile(bd): break
+        
+        return reward
+    
+def on_greedy_btn_click(self, board, samples, depth):
+
+        first_boards = []
+        rew_samples = np.zeros(4)
+
+        for i, move in enumerate(self.moves):
+            # do first known move
+            brd, reward = self.shift_matrix(board, move)
+            # save data
+            first_boards.append(brd)
+            rew_samples[i] = reward
+
+        # do first known move
+        bd_0, reward_0 = self.shift_matrix(board, "up")
+        bd_1, reward_1 = self.shift_matrix(board, "down")
+        bd_2, reward_2 = self.shift_matrix(board, "left")
+        bd_3, reward_3 = self.shift_matrix(board, "right")
+
+        for _ in range(samples):
+            samples[0] += self.getBestGreedyMove(board, "up", depth)
+            samples[1] += self.getBestGreedyMove(board, "down", depth)
+            samples[2] += self.getBestGreedyMove(board, "left", depth)
+            samples[3] += self.getBestGreedyMove(board, "right", depth)
+        
+        return self.moves[np.argmax(samples)]
+
+##################################### GREEDY ALGORITHM END #####################################
 
 
 mat = np.array(
     [[8, 0, 0, 0],
     [2, 0, 0, 0],
     [4, 0, 0, 0],
-    [2, 0, 0, 0],]
+    [2, 0, 0, 0]]
 )
 moves = [
     "up", "down", 
@@ -91,17 +162,190 @@ def samepleMoves(board, samples):
     # get best move
     return moves[np.argmax(rewards)]
 
-print(samepleMoves(mat, 10))
+#print(samepleMoves(mat, 10))
 
 
 def get_free_fields(mat):
 
     # get all empty fields on board
     dim = len(mat)
-    return [[i, j] for i in range(dim) 
-            for j in range(dim) if mat[i, j] == 0]
+    return [[i, j] for i in range(dim) for j in range(dim) if mat[i, j] == 0]
 
-print(get_free_fields(mat))
+board = np.array(
+    [[8, 0, 0, 0],
+    [2, 0, 0, 0],
+    [4, 0, 0, 0],
+    [2, 0, 2, 0]]
+)
+
+def canMove(self):
+    return False if np.allclose(self.prev_board, self.board) else True
+
+def insetTile(board):
+
+    free_pos = get_free_fields(board)
+    if len(free_pos) != 0:
+        new_pos = random.choice(free_pos)
+        np.random.shuffle(urn)
+        rand_tile = random.choice(urn)
+        #print(f"Inserted tile: {rand_tile} at position: {new_pos}")
+        board[new_pos[0], new_pos[1]] = rand_tile
+        return True
+    return False
+
+
+
+'''actions = [
+            self.shift_matrix(board.copy(), "up"),
+            self.shift_matrix(board.copy(), "down"),
+            self.shift_matrix(board.copy(), "left"),
+            self.shift_matrix(board.copy(), "right"),
+        ]
+
+        print(f"Actions: {actions}")
+        if np.max(actions) == 0:
+            return self.on_random_btn_click()
+        
+        return self.moves[np.argmax(actions)]'''
+
+
+'''for i in range(4):
+    move = self.moves[i]
+    bd = board.copy()
+    rewards.append(self.shift_matrix(bd, move)[1])
+    for _ in range(samples):
+        bd, reward = self.shift_matrix(bd, self.on_random_btn_click())
+        rewards[i] += reward
+
+print(f"Rewards: {rewards}")
+# get best move
+        return self.moves[np.argmax(rewards)]'''
+
+'''
+def sample_moves(self, board, move, samples):
+
+        bd = board.copy()
+        total_reward = self.shift_matrix(bd, move)
+        for _ in range(samples-1):
+
+            free_pos = self.get_free_fields(bd)
+            if free_pos == 0: break
+
+            new_pos = random.choice(free_pos)
+            np.random.shuffle(urn)
+            rand_tile = random.choice(urn)
+            bd[new_pos[0], new_pos[1]] = rand_tile
+
+            random_move = self.on_random_btn_click()
+            total_reward += self.shift_matrix(bd, random_move)
+        
+        return total_reward'''
+
+
+'''import random
+from framework.static import urn
+def sample_moves(board, move, samples):
+
+    bd = board.copy()
+    print(f"Move: {move}")
+    total_reward = shift_matrix(bd, move)
+
+    if insetTile(bd):
+        for _ in range(samples-1):
+
+            if not insetTile(bd): break
+
+            random_move = random.choice(["up", "down", "left", "right"])
+            print(f"Move: {random_move}")
+            total_reward += shift_matrix(bd, random_move)
+
+    return total_reward'''
+
+#print(sample_moves(board, "down", 10))
+
+
+
+
+board1 = np.array(
+    [[8, 0, 2, 4],
+    [2, 0, 0, 2],
+    [4, 4, 0, 0],
+    [2, 0, 2, 2]]
+)
+
+import random
+from framework.static import urn
+
+def insetTile(board):
+
+    free_pos = get_free_fields(board)
+    if len(free_pos) != 0:
+        new_pos = random.choice(free_pos)
+        np.random.shuffle(urn)
+        rand_tile = random.choice(urn)
+        #print(f"Inserted tile: {rand_tile} at position: {new_pos}")
+        board[new_pos[0], new_pos[1]] = rand_tile
+        return True
+    return False
+
+def getBestGreedyMove(board, start_move, depth) -> int:
+
+    # do first known move
+    bd, reward = shift_matrix(board, start_move)
+
+    if insetTile(bd):
+        
+        for _ in range(depth-1):
+
+            sample_infos = [
+                shift_matrix(bd, "up"),
+                shift_matrix(bd, "down"),
+                shift_matrix(bd, "left"),
+                shift_matrix(bd, "right"),
+            ]
+
+            # get new computed board
+            boards = [bds[0] for bds in sample_infos]
+            # get new computed rewards
+            rewards = [rwds[1] for rwds in sample_infos]
+
+            # update board
+            bd = boards[np.argmax(rewards)]
+            reward += np.max(rewards)
+            if not insetTile(bd): break
+    
+    return reward
+
+print(
+    getBestGreedyMove(board1, "up", 20),
+    getBestGreedyMove(board1, "down", 20),
+    getBestGreedyMove(board1, "left", 20),
+    getBestGreedyMove(board1, "right", 20)
+)
+
+#print(board1)
+#print(shift_matrix(board1, "down"))
+
+
+'''for i in range(10):
+    move = np.random.choice(moves)
+    print(f"Move: {move}", "\n")
+    print(shift_matrix(board1, move))
+    print("\n")
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 '''sample = [

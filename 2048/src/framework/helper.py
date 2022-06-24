@@ -109,7 +109,7 @@ def load_b_sc_and_settings(path_name):
     sett_vars = {
         "sound": True,
         "show_undo": True,
-        "show_ai_menu": False,
+        "show_ai_menu": True,
         "how_to": True,
         "theme": "light_theme"
     }

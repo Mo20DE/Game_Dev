@@ -28,10 +28,7 @@ class Board:
         self.board_tiles = {} # every used tile on the board
         self.prev_board_tiles = {}
         # meta information
-        self.board_info = {
-            "tile_positions": {},
-            "border": {}
-        }
+        self.tile_positions = {}
 
         # buffer for every move
         self.moveBuffer = []
@@ -39,7 +36,7 @@ class Board:
 
         self.game_state = "playing"
         self.curr_move = None
-        self.prevMove = None
+        self.prevMove = []
 
         self.keyPressed = False
         self.tiles_moving = False
@@ -74,18 +71,18 @@ class Board:
         self.move_speed = tile_info[self.dim][0]
 
         # save every positions of a field (every x,y cordinate)
-        # exp.: index = [2, 1] self.board_info["tile_positions"][str(index[0]+str(index[1]))]
+        # exp.: index = [2, 1] self.tile_positions["tile_positions"][str(index[0]+str(index[1]))]
         for i in range(self.dim):
             for j in range(self.dim):
                 x_coord = board_pos[0]+((j+1)*gap_off[self.dim])+(j*tile_dim[self.dim]) - align_off[self.dim]["x"][j]
                 y_coord = board_pos[1]+((i+1)*gap_off[self.dim])+(i*tile_dim[self.dim]) - align_off[self.dim]["y"][i]
-                self.board_info["tile_positions"][str(i)+str(j)] = [x_coord, y_coord]
+                self.tile_positions[str(i)+str(j)] = [x_coord, y_coord]
         
         # save border of the board
-        #self.board_info["border"]["left"] = self.board_info["tile_positions"]["00"][0]
-        #self.board_info["border"]["right"] = self.board_info["tile_positions"]["0"+str(self.dim-1)][0]+tile_dim[self.dim] #self.board_rect.right - gap_off[self.dim]
-        #self.board_info["border"]["top"] = self.board_info["tile_positions"]["00"][1] #self.board_rect.top + gap_off[self.dim]
-        #self.board_info["border"]["bottom"] = self.board_info["tile_positions"]["0"+str(self.dim-1)][1] #self.board_rect.bottom - gap_off[self.dim]
+        #self.tile_positions["border"]["left"] = self.tile_positions["tile_positions"]["00"][0]
+        #self.tile_positions["border"]["right"] = self.tile_positions["tile_positions"]["0"+str(self.dim-1)][0]+tile_dim[self.dim] #self.board_rect.right - gap_off[self.dim]
+        #self.tile_positions["border"]["top"] = self.tile_positions["tile_positions"]["00"][1] #self.board_rect.top + gap_off[self.dim]
+        #self.tile_positions["border"]["bottom"] = self.tile_positions["tile_positions"]["0"+str(self.dim-1)][1] #self.board_rect.bottom - gap_off[self.dim]
 
         # create 2 random tiles
         if gen_tiles:
@@ -115,9 +112,10 @@ class Board:
         self.board_tiles[idx] = BoardTile(
                 (tile_dim[self.dim], 
                 tile_dim[self.dim]), 
-                self.board_info["tile_positions"][idx], 
+                self.tile_positions[idx], 
                 tile_num, self.dim,
                 self.all_available_tiles[str(tile_num)],
+                spwn_eff=self.anim_move
         )
     
     # algorithm to shift the board
@@ -130,6 +128,8 @@ class Board:
         self.moveBuffer = []
         # flag to save tile positions
         tile_flag = True
+
+        self.tiles_merged = 0
         # save prevous board
         self.prev_board = self.board.copy()
         self.prev_board_tiles = self.board_tiles.copy()
@@ -146,39 +146,39 @@ class Board:
         
         # go through every entry of the board
         for i, row in enumerate(mat):
-            
             for j, elem in enumerate(row):
 
                 if j == 0: continue
-
-                idx_off = 1
+                idx_offset = 1
                 for _ in range(j):
 
                     # non-zero element
                     if elem == 0: break
-
                     # zero and non-zero element
-                    offset = j - idx_off
-                    if mat[i, offset] == 0 and merge_buffer[i, offset] != 1:
+                    offset = j - idx_offset
+                    if (mat[i, offset] == 0 and 
+                        merge_buffer[i, offset] != 1):
+
                         mat[i, offset] = elem
                         mat[i, offset+1] = 0
-                        idx_off += 1
-                        
+                        idx_offset += 1
                         # save tiles to move
-                        self.find_start_end_pos(move_dir, i, j, idx_off, tile_flag)
+                        self.find_start_end_pos(move_dir, i, j, idx_offset, tile_flag)
                         if tile_flag: tile_flag = False
 
                     # two non-zero elements
-                    elif elem == mat[i, offset] and merge_buffer[i, offset] != 1:
+                    elif (elem == mat[i, offset] and 
+                        merge_buffer[i, offset] != 1):
+
+                        merge_buffer[i, offset] = 1
                         mat[i, offset] = 2*elem
                         mat[i, offset+1] = 0
-                        merge_buffer[i, offset] = 1; 
-                        idx_off += 1
-
+                        idx_offset += 1
+                        self.tiles_merged += 1
                         # save tiles to move
-                        self.find_start_end_pos(move_dir, i, j, idx_off, tile_flag)
+                        self.find_start_end_pos(move_dir, i, j, idx_offset, tile_flag)
                         if tile_flag: tile_flag = False
-                
+
                 # reset flag
                 tile_flag = True
 
@@ -244,32 +244,32 @@ class Board:
             
             if move_dir == "up" and tile_idx in self.board_tiles:
 
-                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.y - self.move_speed > self.board_info["tile_positions"][dest_pos][1]:
-                    self.board_tiles[tile_idx].tile_rect.y = self.board_info["tile_positions"][dest_pos][1]
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.y - self.move_speed > self.tile_positions[dest_pos][1]:
+                    self.board_tiles[tile_idx].tile_rect.y = self.tile_positions[dest_pos][1]
                     self.doneTiles.append((i, tile_idx, dest_pos))
                 else:
                     self.board_tiles[tile_idx].tile_rect.y -= self.move_speed
                 
             elif move_dir == "down" and tile_idx in self.board_tiles:
 
-                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.y + self.move_speed < self.board_info["tile_positions"][dest_pos][1]:
-                    self.board_tiles[tile_idx].tile_rect.y = self.board_info["tile_positions"][dest_pos][1]
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.y + self.move_speed < self.tile_positions[dest_pos][1]:
+                    self.board_tiles[tile_idx].tile_rect.y = self.tile_positions[dest_pos][1]
                     self.doneTiles.append((i, tile_idx, dest_pos))
                 else:
                     self.board_tiles[tile_idx].tile_rect.y += self.move_speed
             
             elif move_dir == "left" and tile_idx in self.board_tiles:
 
-                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.x > self.board_info["tile_positions"][dest_pos][0] + self.move_speed:
-                    self.board_tiles[tile_idx].tile_rect.x = self.board_info["tile_positions"][dest_pos][0]
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.x > self.tile_positions[dest_pos][0] + self.move_speed:
+                    self.board_tiles[tile_idx].tile_rect.x = self.tile_positions[dest_pos][0]
                     self.doneTiles.append((i, tile_idx, dest_pos))
                 else:
                     self.board_tiles[tile_idx].tile_rect.x -= self.move_speed
             
             elif move_dir == "right" and tile_idx in self.board_tiles:
 
-                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.x < self.board_info["tile_positions"][dest_pos][0] - self.move_speed:
-                    self.board_tiles[tile_idx].tile_rect.x = self.board_info["tile_positions"][dest_pos][0]
+                if not self.anim_move or not self.board_tiles[tile_idx].tile_rect.x < self.tile_positions[dest_pos][0] - self.move_speed:
+                    self.board_tiles[tile_idx].tile_rect.x = self.tile_positions[dest_pos][0]
                     self.doneTiles.append((i, tile_idx, dest_pos))
                 else:
                     self.board_tiles[tile_idx].tile_rect.x += self.move_speed
@@ -288,13 +288,13 @@ class Board:
 
                 self.board_tiles[dest_pos] = self.board_tiles[tile_idx]
                 del self.board_tiles[tile_idx]
-                self.board_tiles[dest_pos].pos = self.board_info["tile_positions"][dest_pos]
+                self.board_tiles[dest_pos].pos = self.tile_positions[dest_pos]
                 self.moveBuffer.pop(i-idx_off); idx_off += 1
 
             # case 2 - destination of tile is not empty
             else:
                 # case 2.1 - destination tile doesn't move (merge)
-                self.board_tiles[tile_idx].pos = self.board_info["tile_positions"][dest_pos]
+                self.board_tiles[tile_idx].pos = self.tile_positions[dest_pos]
                 self.board_tiles[tile_idx].num *= 2
                 self.board_tiles[tile_idx].tile_img = self.all_available_tiles[str(self.board_tiles[tile_idx].num)]
                 self.board_tiles[dest_pos] = self.board_tiles[tile_idx]
@@ -303,6 +303,17 @@ class Board:
                 self.score += self.board_tiles[dest_pos].num
         
         self.doneTiles = []
+    
+    def make_tile_sound(self):
+        
+        if self.tiles_merged == 0:
+            sound_effects["swipe"].play()
+        elif self.tiles_merged == 1:
+            sound_effects["merge_1"].play()
+        elif self.tiles_merged == 2:
+            sound_effects["merge_2"].play()
+        else:
+            sound_effects["merge_3"].play()
 
     def key_pressed(self, keys):
 
@@ -328,8 +339,7 @@ class Board:
         mat_T = self.board.T
         range_x = self.board_dim[0]-1
 
-        # check horizontally
-        # and vertically
+        # check horizontally and vertically
         for i in range(range_x+1):
             for j in range(range_x):
                 if self.board[i, j] != 0 or mat_T[i, j] != 0:
@@ -456,7 +466,7 @@ class Board:
                 # reset key pressed
                 self.keyPressed = False
 
-        elif self.tiles_moving and not self.keyPressed:
+        elif not self.keyPressed and self.tiles_moving:
 
             # shift tiles on screen
             self.doMove()
