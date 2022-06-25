@@ -205,6 +205,22 @@ class Algorithms:
         self.speed=60
         self.failures = 0
     
+    def randomStrategy(self):
+        # generate a random move
+        return np.random.choice(self.moves)
+    
+    def isArrayZero(self, array):
+        # compare two arrays
+        return np.allclose(array, np.zeros(array.shape))
+    
+    def cantMove(self, board):
+
+        equal_cnt = 0
+        for  move in self.moves:
+            if np.allclose(board, self.shift_matrix(board, move)[0]):
+                equal_cnt += 1
+        return True if equal_cnt > 2 else False
+    
     def shift_matrix(self, mat_, move_dir):
     
         reward = 0
@@ -300,7 +316,7 @@ class Algorithms:
         if depth == 0 or not self.tryInsertTile(board): 
             return reward
         
-        # expand tree
+        # expand tree (make moves)
         sample_data = [
             self.shift_matrix(board, "up"),
             self.shift_matrix(board, "down"),
@@ -334,13 +350,15 @@ class Algorithms:
 
         for _ in range(samples):
             # build sum of samples
-            rew_samples[0] += self.getBestGreedyMove(first_boards[0], rew_samples[0], depth)
-            rew_samples[1] += self.getBestGreedyMove(first_boards[1], rew_samples[1], depth)
-            rew_samples[2] += self.getBestGreedyMove(first_boards[2], rew_samples[2], depth)
-            rew_samples[3] += self.getBestGreedyMove(first_boards[3], rew_samples[3], depth)
+            rew_samples[0] += self.getBestGreedyMove(first_boards[0], rew_samples[0], depth) # up-move
+            rew_samples[1] += self.getBestGreedyMove(first_boards[1], rew_samples[1], depth) # down-move
+            rew_samples[2] += self.getBestGreedyMove(first_boards[2], rew_samples[2], depth) # left-move
+            rew_samples[3] += self.getBestGreedyMove(first_boards[3], rew_samples[3], depth) # right-move
         
-        return self.moves[np.argmax(rew_samples)]
+        # if all moves are the same or matrix isn't changing - return a random move
+        if self.isArrayZero(rew_samples) or self.cantMove(board): 
+            return self.randomStrategy()
+        print(f"Rewards: {rew_samples}")
+        
+        return self.moves[np.argmax(rew_samples/samples)]
     
-    def randomStrategy(self):
-        # generate a random move
-        return np.random.choice(self.moves)

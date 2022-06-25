@@ -56,7 +56,7 @@ class AlgoMenu:
     def on_greedy_btn_click(self):
         # get the best greedy move
         board = self.gameM.game_ent.boards[self.gameM.game_ent.mode].board
-        return self.algos.greedyStrategy(board=board, samples=5, depth=2)
+        return self.algos.greedyStrategy(board=board, samples=2, depth=5)
 
     def on_random_btn_click(self):
         # generate a random move

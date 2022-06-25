@@ -89,6 +89,11 @@ def test_greedy(brd_range, max_range) -> list:
     return final_data
         
 
-simulated_data = test_greedy(1, 4)
-print(simulated_data)
+def isArrayZero(array):
+    return np.allclose(array, np.zeros(array.shape))
+
+#simulated_data = test_greedy(1, 4)
+#print(simulated_data)
+a = np.array([0, 0, 0])
+print(isArrayZero(a))
 
