@@ -1,6 +1,6 @@
 from menues.gamemenu import GameMenu
-from framework.utils import Keys
-from entities.entities import Algorithms, ButtonsRow
+from framework.utils import Keys, ModeBar, SoundBar
+from entities.entities import Algorithms, ButtonsRow, SpeedBar
 from framework.static import *
 
 
@@ -20,21 +20,12 @@ class AlgoMenu:
 
         # object to handle key input
         self.keys = Keys()
-        # toggle button row to choose ai strategy
-        self.toggle_btn_row = ButtonsRow(
-            (37, 680), 15, 4, 
-            toggle_algo_menu_btns_path[0],
-            toggle_algo_menu_btns_path[1],
-            active_btn=3, axis=1
-        )
-
-        # class that includes algorithms
+        # class that includes algorithms for solving the puzzle
         self.algos = Algorithms()
-        
         # load every needed variable
-        self.load_menu_variables()
+        self.load_menu_variables(load_vars=True)
     
-    def load_menu_variables(self):
+    def load_menu_variables(self, load_vars=False):
 
         # get current game theme
         theme = self.gameM.game_ent.sett_vars["theme"]
@@ -46,6 +37,29 @@ class AlgoMenu:
             "stop_btn": game_assets[theme]["algo_menu"]["buttons"]["stop_btn"],
             "step_btn": game_assets[theme]["algo_menu"]["buttons"]["step_btn"]
         }
+
+        # speed bar
+        if load_vars:
+            # toggle button row to choose ai strategy
+            self.toggle_btn_row = ButtonsRow(
+                toggle_btn_row_pos, 17, 4, 
+                toggle_algo_menu_btns_path[0],
+                toggle_algo_menu_btns_path[1],
+                active_btn=3, axis=1, btn_gap=8
+            )
+            # speedbar for tile movement speed
+            self.speedBar = SpeedBar(
+                speed_bar_pos,
+                game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][0],
+                game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][0],
+                game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][1],
+                game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][1]
+            )
+        else:
+            self.speedBar.bar_img = game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][0],
+            self.speedBar.btn_img = game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][0],
+            self.speedBar.bar_img_scroll = game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][1],
+            self.speedBar.btn_img_onHover = game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][1]
     
     def on_nn_btn_click(self):
         pass
@@ -153,6 +167,8 @@ class AlgoMenu:
                 if not self.auto_run: self.buttons["auto_run_btn"].blitButton(screen)
                 else: self.buttons["stop_btn"].blitButton(screen)
 
+                self.speedBar.draw(screen)
+
     def update(self, mPos):
 
         if not self.gameM.states["restart_menu"]:
@@ -181,4 +197,5 @@ class AlgoMenu:
                 else:
                     # handle menu auto-run, step, stop button actions
                     self.handleMenuButtonsActions(mPos)
-        
+                    self.speedBar.update(mPos)
+

@@ -35,7 +35,6 @@ def load_board_data(path_name, theme):
                             )
                             for tile_idx, b_data in zip(board["board_tiles"].keys(), board["board_tiles"].values())
                         }
-
                         # save previous board and tiles
                         #new_board.prev_board = new_board.board
                         #new_board.prev_board_tiles = new_board.board_tiles

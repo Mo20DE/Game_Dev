@@ -156,19 +156,26 @@ tile_info = {
 ai_menu_btn_pos = (165, 690)
 ai_menu_btn_size = (120, 55)
 
-auto_run_btn_pos = (300, 680)
+step_btn_pos = (205, 665)
+step_btn_size = (85, 40)
+
+auto_run_btn_pos = (300, 665)
 auto_run_btn_size = (105, 40)
 
-stop_btn_pos = (300, 680)
+stop_btn_pos = (300, 665)
 stop_btn_size = (85, 40)
-
-step_btn_pos = (200, 680)
-step_btn_size = (85, 40)
 
 algo_menu_bg_pos = (10, 630)
 algo_menu_bg_size = (430, 150)
 
 algo_quit_btn_pos = (14, 635)
+
+toggle_btn_row_pos = (55, 676)
+
+speed_bar_pos = (240, 750)
+speed_bar_size = (145, 7)
+
+speed_bar_btn_size = (20, 20)
 
 ################ Algo Menu End ################
 
@@ -336,6 +343,7 @@ quit_btn = HUDButton(
     Image(quit_btn_size[0], quit_btn_size[1])._render_image("img/light_theme/settings/buttons/menu_buttons/quit_btn_onHover.png", False, True)
 )
 
+
 ################ General Constants End ################
 
 
@@ -482,6 +490,10 @@ def generate_theme_assets(theme):
             "surfaces": {
 
                 "menu_bg": Image(algo_menu_bg_size[0], algo_menu_bg_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/menu_surf.png", False, True),
+                "speed_bar": [
+                    Image(speed_bar_size[0], speed_bar_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/speed_bar.png", False, True),
+                    Image(speed_bar_size[0], speed_bar_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/speed_bar_scroll.png", False, True)
+                ]
             },
 
             "buttons": {
@@ -508,7 +520,11 @@ def generate_theme_assets(theme):
                     Image(step_btn_size[0], step_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/step_btn.png", False, True),
                     step_btn_pos,
                     Image(step_btn_size[0], step_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/step_btn_onHover.png", False, True)
-                )            
+                ),
+                "speed_bar_btn": [
+                    Image(speed_bar_btn_size[0], speed_bar_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/speed_bar_btn.png", False, True),
+                    Image(speed_bar_btn_size[0], speed_bar_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/speed_bar_btn_onHover.png", False, True)
+                ]            
             }
         },
 

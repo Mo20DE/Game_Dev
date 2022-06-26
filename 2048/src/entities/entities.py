@@ -1,6 +1,8 @@
 from framework.utils import *
 from framework.static import *
 
+import random
+
 
 # class to represent a board tile
 class BoardTile:
@@ -188,7 +190,6 @@ class ButtonsRow:
         return self.mode_changed
 
 
-import random
 class Algorithms:
 
     def __init__(self):
@@ -361,4 +362,83 @@ class Algorithms:
         print(f"Rewards: {rew_samples}")
         
         return self.moves[np.argmax(rew_samples/samples)]
+
+
+class SpeedBar:
+
+    def __init__(self, pos, bar_img, btn_img, bar_img_scroll=None, btn_img_onHover=None):
+        
+        self.pos = pos
+        self.bar_img = bar_img
+        self.btn_img = btn_img
+        self.bar_img_scroll = bar_img_scroll
+        self.btn_img_onHover = btn_img_onHover
+
+        self.bar_size = self.bar_img.get_size()
+        self.btn_size = bar_img.get_size()
+
+        self.bar_rect = self.bar_img.get_rect(topleft=self.pos)
+
+        self.scroll_rect = self.bar_rect.copy()
+        self.btn = HUDButton(self.btn_img, (0, 0), self.btn_img_onHover)
+        self.btn.rect.center = self.bar_rect.center
+
+        self.transformScrollBar()
+        self.btn_pressed = False
     
+    def isCursorOnBtnAreaOrInRange(self, mPos):
+
+        if ((mPos[0] >= self.btn.rect.left and mPos[0] <= self.btn.rect.right
+            and mPos[1] >= self.btn.rect.top and mPos[1] <= self.btn.rect.bottom)
+            or mPos[0] >= self.btn.rect.left and mPos[0] <= self.btn.rect.right):
+            return True
+        return False
+    
+    def transformScrollBar(self):
+
+        if self.bar_img_scroll != None:
+            length = self.bar_size[0]-(self.bar_rect.right-self.btn.rect.centerx)
+            if length > 0:
+
+                transformed = pg.transform.scale(self.bar_img_scroll, (round(length), round(self.bar_size[1])))
+                self.bar_img_scroll = transformed
+
+    def draw(self, screen):
+
+        # draw bar and button
+        screen.blit(self.bar_img, self.bar_rect)
+
+        if self.bar_img_scroll != None:
+            # transfom scroll bar if variable set
+            self.transformScrollBar()
+            screen.blit(self.bar_img_scroll, (self.bar_rect))
+            print(self.bar_rect)
+
+        self.btn.blitButton(screen)
+    
+    def update(self, mPos, btn_move_speed=7):
+
+        if self.btn_pressed and not self.btn.checkKeyPressed(): 
+            self.btn_pressed = False
+        # update bar and button
+        if self.btn.isBtnClicked(mPos, only_click=True):
+            self.btn_pressed = True
+        
+        if self.isCursorOnBtnAreaOrInRange(mPos) and self.btn_pressed: return
+
+        # adjust mixer button x axis coordinate
+        if self.btn.rect.centerx < self.bar_rect.left:
+            self.btn.rect.centerx = self.bar_rect.left+2
+        
+        elif self.btn.rect.centerx > self.bar_rect.right:
+            self.btn.rect.centerx = self.bar_rect.right-2
+
+        if (self.btn_pressed and self.btn.rect.centerx > self.bar_rect.left
+            and self.btn.rect.centerx < self.bar_rect.right):
+
+            if mPos[0] < self.btn.rect.centerx:
+                self.btn.rect.centerx -= btn_move_speed
+
+            elif mPos[0] > self.btn.rect.centerx:
+                self.btn.rect.centerx += btn_move_speed
+        

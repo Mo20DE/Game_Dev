@@ -5,7 +5,7 @@
     "5x5": 525232
   },
   {
-    "sound": true,
+    "sound": false,
     "show_undo": true,
     "show_ai_menu": true,
     "how_to": false,

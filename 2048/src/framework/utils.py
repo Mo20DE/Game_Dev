@@ -921,7 +921,7 @@ class HUDButton:
     def isClickCntEven(self):
         return self.click_cnt % 2 == 0
         
-    def isBtnClicked(self, mPos):
+    def isBtnClicked(self, mPos, only_click=False):
 
         # reset button click flag once
         if self.btn_clicked: self.resetBtnClicked()
@@ -947,6 +947,9 @@ class HUDButton:
                 self.btn_clicked = True
                 # increase variable for second image
                 if self.sec_img != None: self.click_cnt += 1
+            
+            if self.checkPressedAndColl(mPos) and only_click:
+                self.btn_clicked = True
             
         return self.btn_clicked
     
@@ -1303,13 +1306,14 @@ class SoundBar:
             self.alphaset = True
     
     def draw_soundbar(self, screen, update=False, mousePos=None, change_mxr_color=False, 
-        change_color=None, alpha=False, alpha_value=None):
+        change_color=None, alpha=False, alpha_value=None, draw_border=True):
 
         self.alpha = alpha
 
         # draw border
-        screen.blit(self.border, (self.left_border_rect.x, self.left_border_rect.y))
-        screen.blit(self.border, (self.right_border_rect.x, self.right_border_rect.y))
+        if draw_border:
+            screen.blit(self.border, (self.left_border_rect.x, self.left_border_rect.y))
+            screen.blit(self.border, (self.right_border_rect.x, self.right_border_rect.y))
 
         # draw bar
         screen.blit(self.mixer_bar, (self.mixer_bar_rect.x, self.mixer_bar_rect.y))
