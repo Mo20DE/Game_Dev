@@ -1,42 +1,43 @@
-from menues.gamemenu import GameMenu
-from framework.utils import Keys, ModeBar, SoundBar
-from entities.entities import Algorithms, ButtonsRow, SpeedBar
 from framework.static import *
+from entities.entities import Algorithms
+from framework.utils import Keys, ButtonsRow, SpeedBar
+from framework.helper import CodeEditor
+from entities.custom_algo import custom_algo
 
 
 class AlgoMenu:
 
-    def __init__(self, gameM: GameMenu):
+    def __init__(self, gameM):
 
         # game menu instance
         self.gameM = gameM
         self.menu_status = "unfolded" # unfolded/collapsed
-        self.auto_run = False
         self.step_run = False
+        self.auto_run = False
 
-        self.current_time = 0
+        self.tile_speed = 0
+        self.step_time = 0
         self.stop_time = 0
         self.auto_run_time = 0
 
-        # object to handle key input
-        self.keys = Keys()
+        # class that handles key input
+        self.keys = Keys(esc_key=False)
         # class that includes algorithms for solving the puzzle
         self.algos = Algorithms()
-        # load every needed variable
-        self.load_menu_variables(load_vars=True)
+        # class that represents a code editor
+        self.code_editor = CodeEditor()
     
-    def load_menu_variables(self, load_vars=False):
-
-        # get current game theme
-        theme = self.gameM.game_ent.sett_vars["theme"]
+    def load_menu_variables(self, theme, load_vars=True):
 
         self.menu_surf = game_assets[theme]["algo_menu"]["surfaces"]["menu_bg"]
         self.buttons = {
             "ai_menu_btn": game_assets[theme]["algo_menu"]["buttons"]["ai_menu_btn"],
             "auto_run_btn": game_assets[theme]["algo_menu"]["buttons"]["auto_run_btn"],
             "stop_btn": game_assets[theme]["algo_menu"]["buttons"]["stop_btn"],
-            "step_btn": game_assets[theme]["algo_menu"]["buttons"]["step_btn"]
+            "step_btn": game_assets[theme]["algo_menu"]["buttons"]["step_btn"],
+            "add_algo_btn": game_assets[theme]["algo_menu"]["buttons"]["add_algo_btn"]
         }
+        self.load_ai_menu_btn_pos()
 
         # speed bar
         if load_vars:
@@ -45,7 +46,7 @@ class AlgoMenu:
                 toggle_btn_row_pos, 17, 4, 
                 toggle_algo_menu_btns_path[0],
                 toggle_algo_menu_btns_path[1],
-                active_btn=3, axis=1, btn_gap=8
+                active_btn=2, axis=1, btn_gap=10
             )
             # speedbar for tile movement speed
             self.speedBar = SpeedBar(
@@ -53,149 +54,159 @@ class AlgoMenu:
                 game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][0],
                 game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][0],
                 game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][1],
-                game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][1]
+                game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][1],
+                def_btn_pos="middle"
             )
+            self.speedBar.defineMixerInterval(15, [1000, 30])
         else:
-            self.speedBar.bar_img = game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][0],
-            self.speedBar.btn_img = game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][0],
-            self.speedBar.bar_img_scroll = game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][1],
-            self.speedBar.btn_img_onHover = game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][1]
+            self.speedBar.setPropertyImg(game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][0], prop="bar")
+            self.speedBar.setPropertyImg(game_assets[theme]["algo_menu"]["surfaces"]["speed_bar"][1], prop="bar_scroll")
+            self.speedBar.setPropertyImg(game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][0]),
+            self.speedBar.setPropertyImg(game_assets[theme]["algo_menu"]["buttons"]["speed_bar_btn"][1], prop="btn_oh")
     
-    def on_nn_btn_click(self):
-        pass
+    def reset_menu(self):
 
-    def on_exp_btn_click(self):
-        pass
+        if self.gameM.game_ent.sett_vars["sound"]: make_click_sound("click_2")
+        self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+            can_do_move=True, anim_spawn=True, anim_move=True)
+        self.menu_status = "unfolded"
+        self.auto_run = False
+        
+    def load_ai_menu_btn_pos(self):
 
-    def on_greedy_btn_click(self):
-        # get the best greedy move
-        board = self.gameM.game_ent.boards[self.gameM.game_ent.mode].board
-        return self.algos.greedyStrategy(board=board, samples=2, depth=5)
+        if self.gameM.game_ent.sett_vars["how_to"]:
+            self.buttons["ai_menu_btn"].resetButtonPos()
+        else: self.buttons["ai_menu_btn"].setButtonPos((165, 660))
 
-    def on_random_btn_click(self):
-        # generate a random move
-        return self.algos.randomStrategy()
+    def setBoardAttributes(self):
+
+        mxr_idx = self.speedBar.getCurrentMixerPoint(only_idx=True)
+        self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+            anim_spawn=True if mxr_idx <= 10 else False)
+        self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+            anim_move=True if mxr_idx <= 11 else False)
     
     def handleMenuButtonsActions(self, mPos):
 
         # get local scope time
-        self.current_time = pg.time.get_ticks()
+        current_time = pg.time.get_ticks()
 
         # handle button actions
-        if self.buttons["step_btn"].isBtnClicked(mPos) and not self.auto_run:
-            self.step_run = True
+        if self.gameM.game_ent.boards[self.gameM.game_ent.mode].game_state != "lost":
+            if not self.auto_run :
 
-        elif (self.buttons["auto_run_btn"].isBtnClicked(mPos) and not self.auto_run and
-            self.gameM.game_ent.boards[self.gameM.game_ent.mode].game_state != "lost"):
+                if self.buttons["add_algo_btn"].isBtnClicked(mPos):
+                    self.code_editor.run_code_editor()
 
-            self.stop_time = pg.time.get_ticks()
-            self.gameM.game_ent.boards[self.gameM.game_ent.mode].anim_move = False
-            self.gameM.canMenuBtnsClick = False
-            self.auto_run = True
+                elif self.buttons["step_btn"].isBtnClicked(mPos):
+
+                    if self.gameM.game_ent.sett_vars["sound"]: make_click_sound("click_1")
+                    self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+                        ai_used=True, can_do_move=False)
+                    self.step_time = pg.time.get_ticks()
+                    self.step_run = True
+
+                elif self.buttons["auto_run_btn"].isBtnClicked(mPos):
+
+                    self.setBoardAttributes()
+                    if self.gameM.game_ent.sett_vars["sound"]: make_click_sound("click_1")
+                    self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+                        ai_used=True, can_do_move=False)
+                    self.stop_time = pg.time.get_ticks()
+                    self.auto_run = True
+          
+            elif (self.buttons["stop_btn"].isBtnClicked(mPos) and current_time - self.stop_time > 400):
+
+                if self.gameM.game_ent.sett_vars["sound"]: make_click_sound("click_1")
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+                    can_do_move=True, anim_spawn=True, anim_move=True)
+                self.auto_run = False
         
-        elif ((self.buttons["stop_btn"].isBtnClicked(mPos) and self.current_time - self.stop_time > 400) or
-            (self.gameM.game_ent.boards[self.gameM.game_ent.mode].game_state == "lost" and self.auto_run)):
-
-            self.gameM.game_ent.boards[self.gameM.game_ent.mode].anim_move = True
-            self.gameM.canMenuBtnsClick = True
+        elif self.auto_run:
+            self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+                can_do_move=True, anim_spawn=True, anim_move=True)
             self.auto_run = False
         
-        ## run algorithms ##
+        ### run algorithms ###
 
+        board = self.gameM.game_ent.boards[self.gameM.game_ent.mode].board
         # run one step
-        if self.step_run:
+        if self.step_run or (self.auto_run and current_time - 
+            self.auto_run_time > self.speedBar.getCurrentMixerPoint()):
 
-            # neural network algorithm
-            if self.toggle_btn_row.getActiveButton() == 0:
-                self.step_run = False
-                pass
-
+            # custom algorithm:
+            if self.toggle_btn_row.active_btn == 0:
+                
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = exec(self.code_editor.code)
+            
             # expectimax algorithm
-            elif self.toggle_btn_row.getActiveButton() == 1:
-                self.step_run = False
-                pass
+            elif self.toggle_btn_row.active_btn == 1:
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.algos.smartStrategy(board, 2)
 
             # greedy algorithm
-            elif self.toggle_btn_row.getActiveButton() == 2:
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_greedy_btn_click()
-                self.step_run = False
+            elif self.toggle_btn_row.active_btn == 2:
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.algos.greedyStrategy(board, 3)
 
             # random algorithm
-            elif self.toggle_btn_row.getActiveButton() == 3:
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_random_btn_click()
-                self.step_run = False
-        
-        # run auto until stop
-        elif self.auto_run and self.current_time - self.auto_run_time > self.algos.speed:
+            else:
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.algos.randomStrategy()
 
-            # neural network algorithm
-            if self.toggle_btn_row.getActiveButton() == 0:
-                pass
-
-            # expectimax algorithm
-            elif self.toggle_btn_row.getActiveButton() == 1:
-                pass
-
-            # greedy algorithm
-            elif self.toggle_btn_row.getActiveButton() == 2:
-                self.auto_run_time = pg.time.get_ticks()
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_greedy_btn_click()
-
-            # random algorithm
-            elif self.toggle_btn_row.getActiveButton() == 3:
-                self.auto_run_time = pg.time.get_ticks()
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.on_random_btn_click()
+            # reset flag    
+            if self.step_run: self.step_run = False
+            else: self.auto_run_time = pg.time.get_ticks()
         
     def draw(self, screen):
 
-        if not self.gameM.states["restart_menu"]:
+        if self.menu_status == "unfolded":
+            # draw ai menu button
+            self.buttons["ai_menu_btn"].blitButton(screen)
 
-            if self.menu_status == "unfolded":
-                # draw ai menu button
-                self.buttons["ai_menu_btn"].blitButton(screen)
+        elif self.menu_status == "collapsed":
+            # draw menu
+            screen.blit(self.menu_surf, algo_menu_bg_pos)
+            # draw quit button
+            quit_btn.blitButton(screen)
+            # draw toggle button row
+            self.toggle_btn_row.blitButtonRow(screen)
 
-            elif self.menu_status == "collapsed":
-                # draw menu
-                screen.blit(self.menu_surf, algo_menu_bg_pos)
-                # draw quit button
-                quit_btn.blitButton(screen)
-                # draw toggle button row
-                self.toggle_btn_row.blitButtonRow(screen)
-
-                # draw buttons
+            # draw buttons
+            game_state = self.gameM.game_ent.boards[self.gameM.game_ent.mode].game_state
+            if not self.auto_run and game_state != "lost": 
                 self.buttons["step_btn"].blitButton(screen)
-                if not self.auto_run: self.buttons["auto_run_btn"].blitButton(screen)
-                else: self.buttons["stop_btn"].blitButton(screen)
+                self.buttons["auto_run_btn"].blitButton(screen)
+                if self.toggle_btn_row.active_btn == 0:
+                    self.buttons["add_algo_btn"].blitButton(screen)
 
-                self.speedBar.draw(screen)
+            else: 
+                self.gameM.draw_deact_game_menu_btn_images(screen, only_step_auto_run=True 
+                    if game_state == "lost" else False)
+                if game_state != "lost": self.buttons["stop_btn"].blitButton(screen)
+
+            # draw speed bar
+
+            self.speedBar.draw(screen)
 
     def update(self, mPos):
 
-        if not self.gameM.states["restart_menu"]:
-            
-            if self.menu_status == "unfolded":
-                if self.buttons["ai_menu_btn"].isBtnClicked(mPos):
+        if self.menu_status == "unfolded":
+            if self.buttons["ai_menu_btn"].isBtnClicked(mPos):
+                if self.gameM.game_ent.sett_vars["sound"]: make_click_sound("click_1")
+                # ai menu button pressed
+                self.menu_status = "collapsed"
+        else:
 
-                    self.gameM.game_ent.boards[self.gameM.game_ent.mode].key_lock = True
-                    # ai menu button pressed
-                    self.menu_status = "collapsed"
-                    #self.gameM.canMenuBtnsClick = False
-
+            # quit button pressed
+            if (quit_btn.isBtnClicked(mPos) or self.keys.keyPressed(pg.K_ESCAPE, "esc_key")):
+                self.reset_menu()
+            # update toggle button row
+            elif self.toggle_btn_row.updateButtonRow(mPos):
+                if self.gameM.game_ent.sett_vars["sound"]: make_click_sound("click_1")
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].set_board_flags(
+                    can_do_move=True, anim_spawn=True, anim_move=True)
+                self.auto_run = False
             else:
-                # quit button pressed
-                if (quit_btn.isBtnClicked(mPos) or self.keys.keyPressed(pg.K_ESCAPE) 
-                    or not self.gameM.game_ent.game_states["playing"]):
-
-                    self.gameM.game_ent.boards[self.gameM.game_ent.mode].key_lock = False
-                    self.gameM.canMenuBtnsClick = True
-                    self.auto_run = False
-                    self.menu_status = "unfolded"
-
-                elif self.toggle_btn_row.updateButtonRow(mPos):
-                    # update toggle button row
-                    self.auto_run = False
-                else:
-                    # handle menu auto-run, step, stop button actions
-                    self.handleMenuButtonsActions(mPos)
-                    self.speedBar.update(mPos)
-
+                # handle menu auto-run, step, stop button actions
+                self.handleMenuButtonsActions(mPos)
+                if self.speedBar.update(mPos, btn_react_on_bar=True):
+                    self.setBoardAttributes()
+            

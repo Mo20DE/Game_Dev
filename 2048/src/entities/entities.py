@@ -18,6 +18,7 @@ class BoardTile:
         self.tile_rect = self.tile_img.get_rect(topleft=self.pos)
 
         self.spawn_effect = spwn_eff
+        self.merge_effect = [False, False]
         self.size_cpy = [self.size[0]-30]*2
         self.spawn_off = 3
         self.tile_center = ((self.pos[0]+(tile_dim[self.dim]/2)), (self.pos[1]+(tile_dim[self.dim]/2)))
@@ -35,200 +36,120 @@ class BoardTile:
         if (self.size[0]+5, self.size[1]+5) <= tuple(self.size_cpy):
             self.spawn_effect = False
     
+    def do_merge_effect(self, screen):
+
+        self.img_cpy = pg.transform.scale(self.tile_img, self.size_cpy)
+        self.img_cpy_rect = self.img_cpy.get_rect()
+        self.img_cpy_rect.center = self.tile_center
+
+        screen.blit(self.img_cpy, self.img_cpy_rect)
+
+        if tuple(self.size_cpy) >= (self.size[0]+15, self.size[1]+15):
+            self.merge_effect[1] = True
+
+        elif not self.merge_effect[1]:
+            self.size_cpy[0] += self.spawn_off
+            self.size_cpy[1] += self.spawn_off
+        
+        elif self.merge_effect[1]:
+            self.size_cpy[0] -= self.spawn_off-1
+            self.size_cpy[1] -= self.spawn_off-1
+        
+        elif self.size_cpy <= tuple(self.size):
+            self.merge_effect[0] = False
+        
+        '''
+        self.img_cpy = pg.transform.scale(self.tile_img, self.size_cpy)
+        self.img_cpy_rect = self.img_cpy.get_rect()
+        self.img_cpy_rect.center = self.tile_center
+
+        screen.blit(self.img_cpy, self.img_cpy_rect)
+
+        if tuple(self.size_cpy) >= (self.size[0]+15, self.size[1]+15):
+            self.merge_effect[1] = True
+
+        elif not self.merge_effect[1]:
+            self.size_cpy[0] += self.spawn_off
+            self.size_cpy[1] += self.spawn_off
+        
+        elif self.merge_effect[1]:
+            self.size_cpy[0] -= self.spawn_off-1
+            self.size_cpy[1] -= self.spawn_off-1
+        
+        elif self.size_cpy <= tuple(self.size):
+            self.merge_effect[0] = False'''
+    
+    def set_pos(self, axis, pos):
+
+        self.pos[0 if axis == "x" else 1] = pos
+        if axis == "x": self.tile_rect.x = pos
+        else: self.tile_rect.y = pos
+    
+    def shift_pos(self, axis, off):
+
+        self.pos[0 if axis == "x" else 1] += off
+        if axis == "x": self.tile_rect.x += off
+        else: self.tile_rect.y += off
+
     def reset_spawn_effect(self):
         self.spawn_effect = True
+    
+    def reset_merge_effect(self):
+        self.merge_effect[0] = True
     
     def draw_tile(self, screen):
 
         if self.spawn_effect: self.do_spawn_effect(screen)
+        elif self.merge_effect[0]: self.do_merge_effect(screen)
         else: screen.blit(self.tile_img, self.tile_rect)
 
 
 # class which represents a move
 class Move:
 
-    def __init__(self, prevBoard, boardTiles, score, movesDone):
-        
-        self.board = prevBoard
-        self.board_tiles = boardTiles
-        self.score = score
-        self.moves_done = movesDone
-
-
-# surface class
-class Surface:
+    def __init__(self): self.init_move()
     
-    def __init__(self, size, pos, color):
+    def init_move(self):
 
-        self.surf = pg.Surface(size)
-        self.surf.fill(color)
-        self.rect = self.surf.get_rect(topleft=pos)
-
-    def blit(self, screen, surf2=None):
-
-        if isinstance(surf2, pg.Surface):
-            self.surf.blit(surf2, self.rect)
-        else: screen.blit(self.surf, self.rect)
-
-
-class ButtonsRow:
-
-    def __init__(self, pos:tuple, btn_rad:int, amount:int, non_click_img_path, 
-                on_click_img_path, active_btn:int=0, btn_gap:int=10, axis:int=0):
-
-        self.pos = pos
-        self.btn_rad = btn_rad
-        self.amount = amount
-        self.non_click_img = non_click_img_path
-        self.on_click_img = on_click_img_path
-
-        self.active_btn = active_btn # default active button
-        self.btn_gap = btn_gap
-        self.axis = axis
-
-        # check whether the parameters
-        # are all of correct type
-        self.check_parameters()
-
-        # contains every button
-        self.buttons = []
-        self.init_buttons()
-        self.mode_changed = False
+        self.board = None
+        self.board_tiles = None
+        self.score = 0
+        self.moves_done = 0
     
-    def check_parameters(self):
-
-        # button size
-        if self.btn_rad < 10 or self.btn_rad > 100:
-            raise ValueError("Invalid button-radius. Button-radius has to be between: 10 and 100 pixel.")
-        
-        # amount
-        if self.amount < 1 or self.amount > 10:
-            raise ValueError("Invalid button-amount provided. Button-amount should be between 1 and 10.")
-        
-        # button gap
-        if self.btn_gap < 0 or self.btn_gap > 100:
-            raise ValueError("Invalid button-gap provided. Button-gap has to be between: 0 and 100.")
-        
-        # button mode
-        if self.active_btn < 0 or self.active_btn > self.amount-1:
-            raise ValueError(f"Invalid Button-mode. Button-mode has to be between: 0 and {self.amount-1}.")
-        
-        # axis
-        if self.axis != 0 and self.axis != 1:
-            raise Exception("Invalid axis provided. Axis has to be 0 or 1.")
-    
-    def setActiveButton(self, idx):
-
-        if idx < 0 and idx > self.amount-1:
-            raise ValueError("Invalid Button Index provided.")
-        
-        self.active_btn = idx
-    
-    def setButtonStatus(self, idx, status):
-
-        if idx < 0 and idx > self.amount-1:
-            raise ValueError("Invalid Button Index provided.")
-
-        if status != "on" and status != "off":
-            raise ValueError("Invalid status type. provided")
-        
-        self.buttons[idx].status = status
-    
-    def isModeChanged(self):
-        return True if self.mode_changed else False
-    
-    def getActiveButton(self):
-        return self.active_btn
-    
-    def init_buttons(self):
-
-        # make button images
-        if isinstance(self.non_click_img, list) and isinstance(self.on_click_img, list):
-
-            self.non_click_img = Image(self.btn_rad, self.btn_rad)._render_images(2, self.non_click_img, False, True)
-            self.on_click_img = Image(self.btn_rad, self.btn_rad)._render_images(2, self.on_click_img, False, True)
-        else:
-            self.non_click_img = Image(self.btn_rad, self.btn_rad)._render_image(self.non_click_img, False, True)
-            self.on_click_img = Image(self.btn_rad, self.btn_rad)._render_image(self.on_click_img, False, True)
-
-        btn_pos = list(self.pos)
-        # init buttons
-        for _ in range(self.amount):
-            self.buttons.append(
-                ToggleButton(
-                    btn_pos,
-                    self.non_click_img,
-                    self.on_click_img
-                )
-            )
-
-            # compute gap-offset
-            btn_pos[self.axis] += self.btn_rad+self.btn_gap
-        
-        # set active button
-        self.buttons[self.active_btn].status = "on"
-    
-    def blitButtonRow(self, screen):
-
-        for btn in self.buttons:
-            btn.blitButton(screen)
-    
-    def updateButtonRow(self, mPos):
-
-        # reset variable
-        if self.mode_changed: self.mode_changed = False
-        # check buttons
-        for i, btn in enumerate(self.buttons):
-            # update buttons
-            if self.active_btn != i:
-                if btn.isToggleBtnClicked(mPos):
-                    self.buttons[self.active_btn].status = "off"
-                    self.buttons[i].status = "on"
-                    self.active_btn = i
-                    self.mode_changed = True
-        
-        return self.mode_changed
-
 
 class Algorithms:
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # every possible move
-        self.moves = [
-            "up", "down", 
-            "left", "right"
-        ]
+        self.moves = ["left", "right", "down", "up"]
+        self.weight_mat = {
+            3: self.construct_weight_matrix(3),
+            4: self.construct_weight_matrix(4),
+            5: self.construct_weight_matrix(5)
+        }
+    
+    def construct_weight_matrix(self, dim):
 
-        # greedy algorithm attributes
-        self.samples=5
-        self.depth=5
-        self.speed=60
-        self.failures = 0
+        f = lambda i, row: row[::-1] if i%2==1 else row
+        return np.array(
+            [f(j, [2**((i+1)+(dim*j)) for i in range(dim)])
+            for j in range(dim)])
     
-    def randomStrategy(self):
-        # generate a random move
-        return np.random.choice(self.moves)
+    def shift_matrix(self, mat_, move_dir) -> tuple:
     
-    def isArrayZero(self, array):
-        # compare two arrays
-        return np.allclose(array, np.zeros(array.shape))
-    
-    def cantMove(self, board):
-
-        equal_cnt = 0
-        for  move in self.moves:
-            if np.allclose(board, self.shift_matrix(board, move)[0]):
-                equal_cnt += 1
-        return True if equal_cnt > 2 else False
-    
-    def shift_matrix(self, mat_, move_dir):
-    
-        reward = 0
-        # merge buffer
-        merge_buffer = np.zeros(mat_.shape)
+        reward, merges = 0, 0
         # move buffer information
-        mat = mat_.copy()
+        b_len = len(mat_)
+        if b_len > 5:
+            if b_len == 9: dim = 3
+            elif b_len == 16: dim = 4
+            else: dim = 5
+            mat = mat_.reshape((dim, dim))
+        else: mat = mat_.copy()
+
+        # merge buffer
+        merge_buffer = np.zeros(mat.shape)
 
         # transform matrix for processing
         if move_dir == "right":
@@ -262,6 +183,7 @@ class Algorithms:
                         merge_buffer[i, offset] = 1
                         mat[i, offset] = 2*elem
                         reward += 2*elem
+                        merges += 1
                         mat[i, offset+1] = 0
                         idx_off += 1
 
@@ -273,15 +195,32 @@ class Algorithms:
         elif move_dir == "down":
             mat = mat.T[::-1, ::]
         
-        return mat, reward
+        return mat, reward, merges
     
-    def get_free_fields(self, bd) -> tuple:
+    def isArrayZero(self, array) -> bool:
+        # compare two arrays
+        return np.allclose(array, np.zeros(array.shape))
+    
+    def cantMove(self, board) -> bool:
+
+        equal_cnt = 0
+        for  move in self.moves:
+            if np.allclose(board, self.shift_matrix(board, move)[0]):
+                equal_cnt += 1
+        return True if equal_cnt > 2 else False
+    
+    #def canShiftDir(self, board, dir):
+    #    return True if not np.allclose(board, self.shift_matrix(board, dir)[0]) else False
+    def canShiftDir(self, board, mod_board) -> bool:
+        return True if not np.allclose(board, mod_board) else False
+    
+    def get_free_fields(self, board) -> list:
         # get all empty fields on board
-        dim = bd.shape[0]
-        return [[i, j] for i in range(dim) for j in range(dim) if bd[i, j] == 0]
+        dim = len(board)
+        return [[i, j] for i in range(dim) for j in range(dim) if board[i, j] == 0]
     
     # check if the game is over
-    def isLost(self, bd):
+    def isLost(self, bd) -> bool:
 
         if len(self.get_free_fields(bd)) > 0: return False
 
@@ -301,7 +240,7 @@ class Algorithms:
 
         free_pos = self.get_free_fields(board)
         # check if there is a free position on the board
-        if len(free_pos) != 0:
+        if len(free_pos) > 0:
             new_pos = random.choice(free_pos)
             np.random.shuffle(urn)
             rand_tile = random.choice(urn)
@@ -311,134 +250,373 @@ class Algorithms:
 
         return False
     
-    def getBestGreedyMove(self, board, reward, depth) -> int:
+    # def eval_board(self, board, n_empty): 
+
+    #     grid = board
+    #     utility = 0
+    #     smoothness = 0
+
+    #     big_t = np.sum(np.power(grid, 2))
+    #     s_grid = np.sqrt(grid)
+    #     smoothness -= np.sum(np.abs(s_grid[::,0] - s_grid[::,1]))
+    #     smoothness -= np.sum(np.abs(s_grid[::,1] - s_grid[::,2]))
+    #     smoothness -= np.sum(np.abs(s_grid[::,2] - s_grid[::,3]))
+    #     smoothness -= np.sum(np.abs(s_grid[0,::] - s_grid[1,::]))
+    #     smoothness -= np.sum(np.abs(s_grid[1,::] - s_grid[2,::]))
+    #     smoothness -= np.sum(np.abs(s_grid[2,::] - s_grid[3,::]))
+        
+    #     empty_w = 100000
+    #     smoothness_w = 3
+
+    #     empty_u = n_empty * empty_w
+    #     smooth_u = smoothness ** smoothness_w
+    #     big_t_u = big_t
+
+    #     utility += (big_t + empty_u + smooth_u)
+
+    #     return (utility, empty_u, smooth_u, big_t_u)
+
+    # def chance(self, board, depth = 0):
+
+    #     empty_cells = self.get_free_fields(board)
+    #     n_empty = len(empty_cells)
+
+    #     #if n_empty >= 7 and depth >= 5:
+    #     #    return self.eval_board(board, n_empty)
+
+    #     if n_empty >= 6 and depth >= 2:
+    #         return self.eval_board(board, n_empty)
+
+    #     elif n_empty >= 0 and depth >= 4:
+    #         return self.eval_board(board, n_empty)
+
+    #     if n_empty == 0:
+    #         _, utility = self.maximize(board, depth + 1)
+    #         return utility
+
+    #     possible_tiles = []
+
+    #     chance_2 = (.9 * (1 / n_empty))
+    #     chance_4 = (.1 * (1 / n_empty))
+        
+    #     for empty_cell in empty_cells:
+    #         possible_tiles.append((empty_cell, 2, chance_2))
+    #         possible_tiles.append((empty_cell, 4, chance_4))
+
+    #     utility_sum = [0, 0, 0, 0]
+
+    #     for t in possible_tiles:
+    #         t_board = board.copy()
+    #         t_board[t[0][0]][t[0][1]] = t[1]
+    #         _, utility = self.maximize(t_board, depth + 1)
+
+    #         for i in range(4):
+    #             utility_sum[i] += utility[i] * t[2]
+        
+    #     return tuple(utility_sum)
+    
+    # def maximize(self, board, depth = 0):
+
+    #     shifted_matrices = [self.shift_matrix(board, move)[0] for move in self.moves]
+    #     max_utility = (float('-inf'), 0, 0, 0)
+    #     best_direction = None
+
+    #     for i, new_board in enumerate(shifted_matrices):
+
+    #         if self.canShiftDir(board, new_board):
+    #             utility = self.chance(new_board, depth + 1)
+
+    #             if utility[0] >= max_utility[0]:
+    #                 max_utility = utility
+    #                 best_direction = self.moves[i]
+        
+    #     return best_direction, max_utility
+    #     #return self.maximize(board)[0]
+    
+    def smartStrategy(self, board, depth) -> str:
+
+        # look for the highest reward, highest merges, and highest number of free fields
+        #boards_in_all_dir = [self.shift_matrix(board, move) for move in self.moves]
+
+        return self.expectimax(board, depth)
+    
+    def expectimax(self, board, depth):
+
+        best_move = None
+        best_utility = float('-inf')
+        for move in self.moves:
+            new_board = self.shift_matrix(board, move)[0]
+            if not self.canShiftDir(board, new_board):
+                continue
+
+            utility = self.chance_node(new_board, depth)
+            if utility > best_utility:
+                best_utility = utility
+                best_move = move
+        
+        return best_move
+    
+    def chance_node(self, board, depth):
+
+        if depth == 0:
+            # evaluate leafs of game-tree
+            return self.eval_board(board)
+
+        total_score = 0
+        free_tiles = self.get_free_fields(board)
+        for free_tile in free_tiles:
+
+            board[free_tile[0], free_tile[1]] = 2
+            total_score += 0.1 * self.compute_move_score(board, depth-1)
+            board[free_tile[0], free_tile[1]] = 0
+            board[free_tile[0], free_tile[1]] = 4
+            total_score += 0.9 * self.compute_move_score(board, depth-1)
+            board[free_tile[0], free_tile[1]] = 0
+
+        return total_score/len(free_tiles)    
+    
+    def compute_move_score(self, board, depth):
+
+        best_score = -1
+        for move in self.moves:
+            b_copy = board.copy()
+            new_board = self.shift_matrix(b_copy, move)[0]
+            if self.canShiftDir(board, new_board):
+                score = self.chance_node(new_board, depth-1)
+                best_score = max(score, best_score)
+        
+        return best_score
+
+    def eval_board(self, board):
+
+        dim = len(board)
+        result = 0
+        for i in range(dim):
+            for j in range(dim):
+                result += board[i][j] * self.weight_mat[dim][i][j]
+
+        return result
+    
+    def greedyStrategy(self, board, depth):
+
+        first_boards = []
+        rew_samples = []
+
+        for move in self.moves:
+            move_data = self.shift_matrix(board, move)
+            # do first known move
+            brd, reward = move_data[0], move_data[1]
+            # save data
+            first_boards.append(brd)
+            rew_samples.append(reward)
+
+        # build sum of samples
+        for i in range(4):
+            rew_samples[i] += self.getBestGreedyMove(
+                first_boards[i], rew_samples[i], depth)
+        
+        final_move = self.moves[np.argmax(rew_samples)]
+        if not self.canShiftDir(board, self.shift_matrix(board, final_move)[0]):
+            return self.randomStrategy()
+
+        return final_move
+
+    def getBestGreedyMove(self, board, reward, depth):
 
         # recursion anchor
-        if depth == 0 or not self.tryInsertTile(board): 
+        if depth < 1 or not self.tryInsertTile(board): 
             return reward
-        
-        # expand tree (make moves)
+
+         # expand tree
         sample_data = [
-            self.shift_matrix(board, "up"),
-            self.shift_matrix(board, "down"),
             self.shift_matrix(board, "left"),
             self.shift_matrix(board, "right"),
+            self.shift_matrix(board, "down"),
+            self.shift_matrix(board, "up")
         ]
-
         # get newly computed boards
         boards = [bds[0] for bds in sample_data]
         # get newly computed rewards
         rewards = [rwds[1] for rwds in sample_data]
 
-        # take best board, move and reward
+        # take best board and reward
         board = boards[np.argmax(rewards)]
         reward += np.max(rewards)
 
         # make recursive call (continue to earch tree)
         return self.getBestGreedyMove(board, reward, depth-1)
-    
-    def greedyStrategy(self, board, samples, depth) -> str:
-
-        first_boards = []
-        rew_samples = np.zeros(4)
-
-        for i, move in enumerate(self.moves):
-            # do first known move
-            brd, reward = self.shift_matrix(board, move)
-            # save data
-            first_boards.append(brd)
-            rew_samples[i] = reward
-
-        for _ in range(samples):
-            # build sum of samples
-            rew_samples[0] += self.getBestGreedyMove(first_boards[0], rew_samples[0], depth) # up-move
-            rew_samples[1] += self.getBestGreedyMove(first_boards[1], rew_samples[1], depth) # down-move
-            rew_samples[2] += self.getBestGreedyMove(first_boards[2], rew_samples[2], depth) # left-move
-            rew_samples[3] += self.getBestGreedyMove(first_boards[3], rew_samples[3], depth) # right-move
         
-        # if all moves are the same or matrix isn't changing - return a random move
-        if self.isArrayZero(rew_samples) or self.cantMove(board): 
-            return self.randomStrategy()
-        print(f"Rewards: {rew_samples}")
+    def randomStrategy(self):
+
+        # generate a random move
+        return np.random.choice(self.moves)
+
+
+'''# make move in all directions according to depth
+        shifted_matrices, can_shift_dir = [], []
+        for move in self.moves:
+            shifted_matrices.append(self.shift_matrix(board, move))
+            can_shift_dir.append(self.canShiftDir(board, shifted_matrices[-1][0]))
         
-        return self.moves[np.argmax(rew_samples/samples)]
+        # no desired move possible
+        if not any(can_shift_dir[0:3]): 
 
-
-class SpeedBar:
-
-    def __init__(self, pos, bar_img, btn_img, bar_img_scroll=None, btn_img_onHover=None):
+            return "up"
+        rewards, merges, free_fields = [], [], []
+        for i in range(3):
+            rewards.append(shifted_matrices[i][1])
+            merges.append(shifted_matrices[i][2])
+            free_fields.append(len(self.get_free_fields(shifted_matrices[i][0])))
         
-        self.pos = pos
-        self.bar_img = bar_img
-        self.btn_img = btn_img
-        self.bar_img_scroll = bar_img_scroll
-        self.btn_img_onHover = btn_img_onHover
+        print(rewards, merges, free_fields)
+        left = (rewards[0]*merges[0])/free_fields[0]
+        right = (rewards[1]*merges[1])/free_fields[1]
+        down = (rewards[2]*merges[2])/free_fields[2]
 
-        self.bar_size = self.bar_img.get_size()
-        self.btn_size = bar_img.get_size()
+        return self.moves[np.argmax([left, right, down])]
 
-        self.bar_rect = self.bar_img.get_rect(topleft=self.pos)
 
-        self.scroll_rect = self.bar_rect.copy()
-        self.btn = HUDButton(self.btn_img, (0, 0), self.btn_img_onHover)
-        self.btn.rect.center = self.bar_rect.center
+        for _ in range(depth-1):
+            idx = 0
+            for new_mat, can_shift_mat in zip(shifted_matrices, can_shift_mat):
+                if can_shift_mat:
+                    free_fields = self.get_free_fields(new_mat[0])
+                    # save previous data
+                    rewards[idx] += new_mat[idx][1]
+                    merges[idx] += new_mat[idx][2]
+                    free_fields[idx] += len(free_fields)
+                    # check if there is a free position on the board
+                    if len(free_pos) > 0:
+                        new_pos = random.choice(free_pos)
+                        np.random.shuffle(urn)
+                        rand_tile = random.choice(urn)
+                        #print(f"Inserted tile: {rand_tile} at position: {new_pos}")
+                        board[new_pos[0], new_pos[1]] = rand_tile 
 
-        self.transformScrollBar()
-        self.btn_pressed = False
-    
-    def isCursorOnBtnAreaOrInRange(self, mPos):
 
-        if ((mPos[0] >= self.btn.rect.left and mPos[0] <= self.btn.rect.right
-            and mPos[1] >= self.btn.rect.top and mPos[1] <= self.btn.rect.bottom)
-            or mPos[0] >= self.btn.rect.left and mPos[0] <= self.btn.rect.right):
-            return True
-        return False
-    
-    def transformScrollBar(self):
-
-        if self.bar_img_scroll != None:
-            length = self.bar_size[0]-(self.bar_rect.right-self.btn.rect.centerx)
-            if length > 0:
-
-                transformed = pg.transform.scale(self.bar_img_scroll, (round(length), round(self.bar_size[1])))
-                self.bar_img_scroll = transformed
-
-    def draw(self, screen):
-
-        # draw bar and button
-        screen.blit(self.bar_img, self.bar_rect)
-
-        if self.bar_img_scroll != None:
-            # transfom scroll bar if variable set
-            self.transformScrollBar()
-            screen.blit(self.bar_img_scroll, (self.bar_rect))
-            print(self.bar_rect)
-
-        self.btn.blitButton(screen)
-    
-    def update(self, mPos, btn_move_speed=7):
-
-        if self.btn_pressed and not self.btn.checkKeyPressed(): 
-            self.btn_pressed = False
-        # update bar and button
-        if self.btn.isBtnClicked(mPos, only_click=True):
-            self.btn_pressed = True
+     monotonic_reward = [0, 0, 0]
+        smoothness = [0, 0, 0]
+        data_of_every_dir = data_of_every_dir[0:3]
+        for k, b_data in enumerate(data_of_every_dir):
+            # evaluate monotnic order of board
+            b_len = len(board)
+            for i, row in enumerate(b_data[0]):
+                if (i+1) % 2 == 0: row = row[::-1]
+                for j in range(b_len-1):
+                    if np.sum(row) > 0:
+                        if row[j] > 0 and row[j] > row[j+1]:
+                            monotonic_reward[k] += 0.5
+                        elif row[j] > 0 and row[j] < row[j+1]:
+                            monotonic_reward[k] -= 1
+                        if row[j] > 0 and row[j+1] > 0:
+                            if row[j]-row[j+1] == 0:
+                                smoothness[k] += log2(row[j])
         
-        if self.isCursorOnBtnAreaOrInRange(mPos) and self.btn_pressed: return
-
-        # adjust mixer button x axis coordinate
-        if self.btn.rect.centerx < self.bar_rect.left:
-            self.btn.rect.centerx = self.bar_rect.left+2
+        end_results = []
+        for i, data in enumerate(data_of_every_dir):
+            end_results.append(
+                (len(self.get_free_fields(data[0]))+(0.9*2)+(0.1*4)) + 
+                data[1] + data[2] + monotonic_reward[i] +
+                smoothness[i]
+            )
         
-        elif self.btn.rect.centerx > self.bar_rect.right:
-            self.btn.rect.centerx = self.bar_rect.right-2
-
-        if (self.btn_pressed and self.btn.rect.centerx > self.bar_rect.left
-            and self.btn.rect.centerx < self.bar_rect.right):
-
-            if mPos[0] < self.btn.rect.centerx:
-                self.btn.rect.centerx -= btn_move_speed
-
-            elif mPos[0] > self.btn.rect.centerx:
-                self.btn.rect.centerx += btn_move_speed
+        if int(end_results[0]) == int(end_results[1]) == int(end_results[2]):
+            if can_move_three_dir[1] or can_move_three_dir[2]:
+                return np.random.choice(["down", "right"])
+            else: return "left"
         
+        print(end_results)
+        return self.moves[np.argmax(end_results)]'''
+
+'''
+def cornerStrategy(self, board: np.ndarray) -> str:
+
+
+        ### heuristics ###
+        # free fields on the board
+        # smoothness (measures the value difference of adjacent tiles - trying to minimize this count)
+        # weight matrix
+
+        # do move in all 4 directions
+        data_of_every_dir = [self.simOneStep(board, move) for move in self.moves]
+        can_move_dir = [self.canShiftDir(board, b_data[0]) for b_data in data_of_every_dir]
+
+        # can only move upwards
+        if not any(can_move_dir[0:3]): return "up"
+
+        # delete board data of a direction we can't move
+        cleaned_data_of_every_dir = {}
+        for i, data in enumerate(data_of_every_dir):
+            if can_move_dir[i]: 
+                cleaned_data_of_every_dir[self.moves[i]] = data
+        
+        # if there is only one direction to move -> execute move
+        if len(cleaned_data_of_every_dir) == 1: 
+            return list(cleaned_data_of_every_dir.keys())[0]
+        
+        # get the free fields of every board
+        free_fields = [len(self.get_free_fields(data[0])) 
+            for data in cleaned_data_of_every_dir.values()]
+
+        # make symmetric weight matrix
+        if self.sym_mat is None:
+            self.sym_mat = self.constructSymMatrix(board.shape)
+        elif self.sym_mat.shape != board.shape:
+            self.sym_mat = self.constructSymMatrix(board.shape)
+
+        ## evaluate every board ## - choose the best (most promising) move (at least 2 moves)
+        data_len = len(cleaned_data_of_every_dir)
+        weights, smoothness_scores = [], np.zeros(data_len)
+
+        for s, data in enumerate(cleaned_data_of_every_dir.values()):
+
+            # evaluate weights of each move
+            weight_sum = 0
+            _board = data[0]
+            b_len = len(board)
+            for i in range(b_len):
+                for j in range(b_len):
+
+                    # compute weights (monotonicity)
+                    weight_sum += _board[i, j] * self.sym_mat[i, j]
+
+                    # compute smoothness
+                    if _board[i, j] == 0: continue
+                    temp_score = 0
+                    for k in range(-1, 2):
+                        p = i + k
+                        if p < 0 or p >= b_len: continue
+                        for l in range(-1, 2):
+                            q = j + l
+                            if q < 0 or q >= b_len: continue
+                            if _board[p, q] > 0:
+                                temp_score -= abs(_board[i, j] - _board[p, q])
+
+                    smoothness_scores[s] -= temp_score
+            weights.append(weight_sum)
+
+        final_score = [[], []] 
+        smoothWeight = 0.1
+        mono2Weight  = 1.0
+        emptyWeight  = 2.7
+        maxWeight    = 1.0
+
+        # compute final score
+        data = list(cleaned_data_of_every_dir.values())
+        for i, move in enumerate(cleaned_data_of_every_dir.keys()):
+            #heur_score = weights[i] - smoothness_scores[i]
+            #act_score = min(weights[i], 1)
+            #act_score = max(act_score, heur_score)
+
+            final_score[0].append(move)
+            final_score[1].append(
+                smoothness_scores[i] * smoothWeight +
+                weights[i] * mono2Weight +
+                math.log(free_fields[i]) * emptyWeight + 
+                np.max(data[i][0]) * maxWeight
+            )
+        
+        print(final_score)
+        print(final_score[0][np.argmax(final_score[1])])
+        return final_score[0][np.argmax(final_score[1])]
+        '''

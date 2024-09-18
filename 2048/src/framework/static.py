@@ -4,16 +4,9 @@ from framework.utils import Image, HUDButton, ToggleButton, Colors, Sound
 
 ################ Main Program Begin ################
 
-width, height, caption, fps = 450, 780, "2048", 60
+width, height, caption, fps = 450, 780, "2048 by MZM", 60
 
 ################ Main Program End ################
-
-
-
-################ Game Data Begin ################
-
-
-################ Game Data End ################
 
 
 
@@ -22,13 +15,15 @@ width, height, caption, fps = 450, 780, "2048", 60
 # all modes and default mode
 #mode = [["3x3", "4x4", "5x5"], 1]
 
-preview_pos = [50, 50]
+date_time_pos = [140, 34]
+
+preview_pos = [50, 85]
 preview_size = [350, 350]
 
-l_r_slide_btn_pos = ([50, 470], [350, 470])
+l_r_slide_btn_pos = ([50, 485], [350, 485])
 l_r_slide_btn_size = (50, 52)
 
-mode_font_pos = (195, 480)
+mode_font_pos = (195, 495)
 mode_font_size = (66, 40)
 
 start_button_pos = (135, 590)
@@ -49,14 +44,28 @@ sound_effects = {
     "swipe": Sound("audio/swipe.wav"),
     "merge_1": Sound("audio/merge_1.wav"),
     "merge_2": Sound("audio/merge_2.wav"),
-    "merge_3": Sound("audio/merge_3.wav")
+    "merge_3": Sound("audio/merge_3.wav"),
+
+    "click_1": Sound("audio/click_1.wav"),
+    "click_2": Sound("audio/click_2.wav")
 }
-'''audio_dec = [
-    "merge_1", "merge_1", "merge_1",
-    "merge_1", "merge_2", "merge_1",
-    "merge_3", "merge_1", "merge_2",
-    "merge_1", "merge_1", "merge_2"
-]'''
+
+def make_click_sound(click_kind):
+    # play a click sound
+    sound_effects[click_kind].play()
+
+next_goal_sent = {
+    "2048": "Join the numbers and get to the 2048 tile!",
+    "4096": "Your next goal is to get to the 4096 tile!",
+    "8192": "Your next goal is to reach the 8192 tile!",
+    "16384": "Join the numbers to reach the 16384 tile!",
+    "32768 ": "Can you get to the 32768 tile? Try it out!",
+    "65536": "Not bad! Try to reach the 65536 tile!",
+    "131072": "Great job! Try to get to the 131072 tile!",
+    "262144": "Fantastic! Now try to get to the 262144 tile!",
+    "524288": "You are insane! Can you get any further?",
+    "1048576": "What a crazy player you are!" 
+}
 
 ## GameMenu ##
 game_icon_pos = (40, 40)
@@ -93,16 +102,15 @@ btn_size = (85, 50)
 try_again_btn_pos = (170, 480)
 try_again_btn_size = (110, 40)
 
-game_over_surf_pos = (70, 370)
+game_over_surf_pos = (68, 360)
 game_over_surf_size = (320, 66)
-
 
 moves_done_color = {
     "light_theme": Colors.DARKGREY, 
     "dark_theme": Colors.WHITE
 }
 
-goal_sent_pos = (38, 182)
+goal_sent_pos = (40, 185)
 goal_sent_sizes = (
     (330, 24),
     (330, 24),
@@ -113,40 +121,38 @@ goal_sent_sizes = (
 how_to_pos = (25, 630)
 how_to_size = (405, 45)
 
+timer_y_pos = {
+    3: 370,
+    4: 360,
+    5: 346,
+    6: 336
+}
 
 ## board ##
 
 # urn for tile genration
-urn = [2, 2, 2, 2, 4, 2, 2, 4, 2, 2]
+urn = [2, 2, 2, 2, 4, 2, 2, 2, 2, 2]
 
 board_pos = (40, 220) # originally (40, 200)
 board_size = (370, 370)
 
 # dimension of every tile
-tile_dim = {3: 106, 4: 78, 5: 62}
+tile_dim = {3: 107, 4: 78, 5: 62}
 # gap offset of every board
-gap_off = {3: 20, 4: 16, 5: 13}
+gap_off = {3: 19, 4: 16.1, 5: 13}
 
 align_off = {
-    3: {
-        "x": [5.2, 13, 19],
-        "y": [5.2, 13, 19]
-    },
-    4: {
-        "x": [4, 7.2, 13, 16.2],
-        "y": [5, 7.6, 13.2, 17.6]
-    },
-    5: {
-        "x": [3, 5.2, 8.8, 10.2, 13.2],
-        "y": [3, 5, 9, 9.2, 13.2]
-    }
+    3: [5.2, 13, 19],
+    4: [4.5, 7.6, 12.4, 16.49],
+    5: [3, 5.2, 8.8, 10.2, 13.2]
 }
 
 ### in-game constants ###
 tile_info = {
     3: [40, "3x3_board", "3x3_board_tiles"], 
     4: [43, "4x4_board", "4x4_board_tiles"], 
-    5: [46, "5x5_board", "5x5_board_tiles"]}
+    5: [46, "5x5_board", "5x5_board_tiles"]
+}
 
 ################ Game Menu End ################
 
@@ -156,21 +162,24 @@ tile_info = {
 ai_menu_btn_pos = (165, 690)
 ai_menu_btn_size = (120, 55)
 
-step_btn_pos = (205, 665)
+step_btn_pos = (205, 660)
 step_btn_size = (85, 40)
 
-auto_run_btn_pos = (300, 665)
+auto_run_btn_pos = (300, 660)
 auto_run_btn_size = (105, 40)
 
-stop_btn_pos = (300, 665)
+stop_btn_pos = (300, 660)
 stop_btn_size = (85, 40)
+
+add_algo_btn_pos = (125, 660)
+add_algo_btn_size = (70, 40)
 
 algo_menu_bg_pos = (10, 630)
 algo_menu_bg_size = (430, 150)
 
 algo_quit_btn_pos = (14, 635)
 
-toggle_btn_row_pos = (55, 676)
+toggle_btn_row_pos = (32, 671)
 
 speed_bar_pos = (240, 750)
 speed_bar_size = (145, 7)
@@ -184,10 +193,10 @@ speed_bar_btn_size = (20, 20)
 
 bg_pos = (0, 0)
 
-made_by_pos = (345, 750)
+made_by_pos = (350, 755)
 made_by_size = (90, 18)
 
-back_btn_pos = [160, 670]
+back_btn_pos = [160, 676]
 back_btn_size = (140, 64)
 
 reset_board_btn_pos = [[90, 380], [160, 380], [230, 380], [300, 380]]
@@ -207,11 +216,17 @@ reset_btn_no_pos = [250, 394]
 restart_window_pos = (65, 180)
 restart_window_size = (320, 230)
 
-boards_delete_btn_pos = (180, 190)
-boards_delete_btn_size = (110, 50)
+statistics_btn_pos = (305, 190)
+statistics_btn_size = (110, 45)
 
-reset_b_score_btn_pos = (310, 190)
-reset_b_score_btn_size = (110, 50)
+reset_stats_btn_pos = (175, 600)
+reset_stats_btn_size = (110, 50)
+
+boards_delete_btn_pos = (185, 255)
+boards_delete_btn_size = (105, 45)
+
+reset_b_score_btn_pos = (310, 255)
+reset_b_score_btn_size = (105, 45)
 
 
 reset_btns_pos1 = (130, 270)
@@ -221,18 +236,18 @@ reset_btns_pos4 = (240, 335)
 
 reset_btns_size = (80, 46)
 
-quit_btn_pos = (72, 188)
-quit_btn_size = (16, 16)
+quit_btn_pos = (70, 186)
+quit_btn_size = (18, 18)
 
-toggle_sound_btn_pos = (340, 280)
+toggle_sound_btn_pos = (355, 325)
 
-toggle_undo_btn_pos = (340, 355)
+toggle_undo_btn_pos = (355, 395)
 
-toggle_ai_menu_btn_pos = (340, 430)
+toggle_ai_menu_btn_pos = (355, 465)
 
-toggle_how_to_btn_pos = (340, 505)
+toggle_how_to_btn_pos = (355, 535)
 
-toggle_game_theme_btn_pos = (340, 580)
+toggle_game_theme_btn_pos = (355, 605)
 
 toggle_btn_size = (60, 30)
 
@@ -240,9 +255,27 @@ yes_btn_pos = [130, 335]
 no_btn_pos = [240, 335]
 ok_btn_pos = [185, 335]
 
+# stats #
+stats_bg_clr = {
+    "light_theme": (234, 216, 196),
+    "dark_theme": (97, 99, 125)
+}
+com_soon_surf_clr = {
+    "light_theme": (210, 165, 83),
+    "dark_theme": (48, 83, 139)
+}
+
+info_surf_bg_clr = {
+    "light_theme": (218, 195, 172),
+    "dark_theme": (108, 110, 135)
+}
+
+stats_score_x = [390, 378, 368, 356, 344, 332, 320] # digit length: 1-7
+
+info_btn_size = (20, 20)
+info_btn_pos = (385, 122)
+
 ################ Settings End ################
-
-
 
 
 ################ General Constants Begin ################
@@ -252,8 +285,7 @@ app_icon_size = (300, 300)
 # alpha vars for new game (button)
 alpha_surf = pg.Surface((width, height))
 alpha_surf.fill(Colors.BLACK)
-alpha_val = 220
-alpha_buffer = None
+alpha_val = 180
 
 # alpha vars for try again (button)
 alpha_s1 = pg.Surface(board_size)
@@ -262,7 +294,6 @@ alpha_s1.fill(Colors.LIGHTCREAMYELLOW)
 alpha_s2.fill(Colors.LIGHTCREAMBLUE)
 alpha_pos2 = board_pos
 alpha_val2 = 130
-alpha_buffer2 = None
 
 alpha_surfs = {
     "light_theme": alpha_s1,
@@ -289,7 +320,9 @@ tiles_path = {
     "32768": "/in_game/tiles/32768_tile.png",
     "65536": "/in_game/tiles/65536_tile.png",
     "131072": "/in_game/tiles/131072_tile.png",
-    "262144": "/in_game/tiles/262144_tile.png"
+    "262144": "/in_game/tiles/262144_tile.png",
+    "524288": "/in_game/tiles/524288_tile.png",
+    "1048576": "/in_game/tiles/1048576_tile.png"
 }
 
 toggle_algo_menu_btns_path = [
@@ -301,11 +334,11 @@ toggle_algo_menu_btns_path = [
 
 toggle_images = [
 
-    Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/light_theme/settings/buttons/toggle_buttons/on_toggle_button.png", False, True),
-    #Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/light_theme/settings/buttons/toggle_buttons/on_toggle_button_onHover.png", False, True),
+    Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/general/on_toggle_button.png"),
+    Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/general/off_toggle_button.png"),
 
-    Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/light_theme/settings/buttons/toggle_buttons/off_toggle_button.png", False, True),
-    #Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/light_theme/settings/buttons/toggle_buttons/off_toggle_button_onHover.png", False, True),
+    Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/general/toggle_light_theme_button.png"),
+    Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/general/toggle_dark_theme_button.png")
 ]
 
 toggle_btns = {
@@ -332,20 +365,27 @@ toggle_btns = {
 
     "toggle_game_theme_btn": ToggleButton(
         toggle_game_theme_btn_pos,
-        Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/light_theme/settings/buttons/toggle_buttons/toggle_light_theme_button.png", False, True),
-        Image(toggle_btn_size[0], toggle_btn_size[1])._render_image("img/light_theme/settings/buttons/toggle_buttons/toggle_dark_theme_button.png", False, True)
+        toggle_images[2], toggle_images[3]
     )
 }
 
 quit_btn = HUDButton(
-    Image(quit_btn_size[0], quit_btn_size[1])._render_image("img/light_theme/settings/buttons/menu_buttons/quit_btn.png", False, True),
+    Image(quit_btn_size[0], quit_btn_size[1])._render_image("img/general/quit_btn.png"),
     algo_quit_btn_pos,
-    Image(quit_btn_size[0], quit_btn_size[1])._render_image("img/light_theme/settings/buttons/menu_buttons/quit_btn_onHover.png", False, True)
+    Image(quit_btn_size[0], quit_btn_size[1])._render_image("img/general/quit_btn_onHover.png")
 )
+
+deact_btn_imgs = {
+    "home": Image(home_btn_size[0], home_btn_size[1])._render_image("img/general/home_button_deact.png"),
+    "new": Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/general/new_gm_button_deact.png"),
+    "new_long": Image(long_restart_btn_size[0], long_restart_btn_size[1])._render_image("img/general/new_game_button_deact.png"),
+    "undo": Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/general/undo_button_deact.png"),
+    "auto_run": Image(auto_run_btn_size[0], auto_run_btn_size[1])._render_image("img/general/auto_run_btn_deact.png"),
+    "step": Image(step_btn_size[0], step_btn_size[1])._render_image("img/general/step_btn_deact.png")
+}
 
 
 ################ General Constants End ################
-
 
 
 def load_tiles(dim, theme):
@@ -353,7 +393,7 @@ def load_tiles(dim, theme):
     all_available_tiles = {} # all 14 available tiles
     for key, value in zip(tiles_path.keys(), tiles_path.values()):
         first_path = "img/"+theme
-        tile_img = Image(tile_dim[dim], tile_dim[dim])._render_image(first_path+value, False, True)
+        tile_img = Image(tile_dim[dim], tile_dim[dim])._render_image(first_path+value)
         all_available_tiles[key] = tile_img
 
     return all_available_tiles
@@ -366,9 +406,9 @@ def generate_theme_assets(theme):
 
             "boards": {
 
-                "3x3_board": Image(board_size[0], board_size[1])._render_image("img/"+theme+"/in_game/boards/3x3_board.png", False, True),
-                "4x4_board": Image(board_size[0], board_size[1])._render_image("img/"+theme+"/in_game/boards/4x4_board.png", False, True),
-                "5x5_board": Image(board_size[0], board_size[1])._render_image("img/"+theme+"/in_game/boards/5x5_board.png", False, True)
+                "3x3_board": Image(board_size[0], board_size[1])._render_image("img/"+theme+"/in_game/boards/3x3_board.png"),
+                "4x4_board": Image(board_size[0], board_size[1])._render_image("img/"+theme+"/in_game/boards/4x4_board.png"),
+                "5x5_board": Image(board_size[0], board_size[1])._render_image("img/"+theme+"/in_game/boards/5x5_board.png")
             },
 
             "tiles": {
@@ -383,53 +423,60 @@ def generate_theme_assets(theme):
 
             "surfaces": {
 
-                "theme": Image(width, height)._render_image("img/"+theme+"/main_menu/surfaces/"+theme+"_bg.png", False, True),
+                "theme": Image(width, height)._render_image("img/"+theme+"/main_menu/surfaces/"+theme+"_bg.png"),
 
                 "board_previews": {
 
-                    "3x3": Image(preview_size[0], preview_size[1])._render_image("img/"+theme+"/main_menu/surfaces/3x3_preview.png", False, True),
-                    "4x4": Image(preview_size[0], preview_size[1])._render_image("img/"+theme+"/main_menu/surfaces/4x4_preview.png", False, True),
-                    "5x5": Image(preview_size[0], preview_size[1])._render_image("img/"+theme+"/main_menu/surfaces/5x5_preview.png", False, True)
+                    "3x3": Image(preview_size[0], preview_size[1])._render_image("img/"+theme+"/main_menu/surfaces/3x3_preview.png"),
+                    "4x4": Image(preview_size[0], preview_size[1])._render_image("img/"+theme+"/main_menu/surfaces/4x4_preview.png"),
+                    "5x5": Image(preview_size[0], preview_size[1])._render_image("img/"+theme+"/main_menu/surfaces/5x5_preview.png")
                 },
 
                 "board_font": {
 
-                    "3x3": Image(mode_font_size[0], mode_font_size[1])._render_image("img/"+theme+"/main_menu/surfaces/3x3_font.png", False, True),
-                    "4x4": Image(mode_font_size[0], mode_font_size[1])._render_image("img/"+theme+"/main_menu/surfaces/4x4_font.png", False, True),
-                    "5x5": Image(mode_font_size[0], mode_font_size[1])._render_image("img/"+theme+"/main_menu/surfaces/5x5_font.png", False, True)
+                    "3x3": Image(mode_font_size[0], mode_font_size[1])._render_image("img/"+theme+"/main_menu/surfaces/3x3_font.png"),
+                    "4x4": Image(mode_font_size[0], mode_font_size[1])._render_image("img/"+theme+"/main_menu/surfaces/4x4_font.png"),
+                    "5x5": Image(mode_font_size[0], mode_font_size[1])._render_image("img/"+theme+"/main_menu/surfaces/5x5_font.png")
                 }
             },
 
             "buttons": {
                 
                 "start_btn": HUDButton(
-                    Image(start_button_size[0], start_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/start_button.png", False, True),
+                    Image(start_button_size[0], start_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/start_button.png"),
                     start_button_pos,
-                    Image(start_button_size[0], start_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/start_button_onHover.png", False, True)
+                    Image(start_button_size[0], start_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/start_button_onHover.png")
                 ),
                 
                 "sett_btn": HUDButton(
-                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/settings_button.png", False, True),
+                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/settings_button.png"),
                     settings_button_pos,
-                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/settings_button_onHover.png", False, True)
+                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/settings_button_onHover.png")
                 ),
 
                 "exit_btn": HUDButton(
-                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/exit_button.png", False, True),
+                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/exit_button.png"),
                     exit_button_pos,
-                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/exit_button_onHover.png", False, True)
+                    Image(sett_exit_button_size[0], sett_exit_button_size[1])._render_image("img/"+theme+"/main_menu/buttons/exit_button_onHover.png")
                 ),
 
                 "left_slide_btn": HUDButton(
-                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/left_slide_button.png", False, True),
+                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/left_slide_button.png"),
                     l_r_slide_btn_pos[0],
-                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/left_slide_button_onHover.png", False, True)
+                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/left_slide_button_onHover.png")
                 ),
                 
                 "right_slide_btn": HUDButton(
-                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/right_slide_button.png", False, True),
+                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/right_slide_button.png"),
                     l_r_slide_btn_pos[1],
-                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/right_slide_button_onHover.png", False, True)
+                    Image(l_r_slide_btn_size[0], l_r_slide_btn_size[1])._render_image("img/"+theme+"/main_menu/buttons/right_slide_button_onHover.png")
+                ),
+
+                "made_by_btn": HUDButton(
+                    Image(made_by_size[0], made_by_size[1])._render_image("img/"+theme+"/main_menu/buttons/made_by.png"),
+                    made_by_pos,
+                    Image(made_by_size[0], made_by_size[1])._render_image("img/"+theme+"/main_menu/buttons/made_by_onHover.png"),
+                    web_link="https://mzm20.itch.io"
                 )
             }
         },
@@ -438,49 +485,43 @@ def generate_theme_assets(theme):
 
             "surfaces": {
 
-                "icon": Image(game_icon_size[0], game_icon_size[1])._render_image("img/"+theme+"/game_menu/surfaces/icon.png", False, True),
-                "score_frame": Image(s_b_img_size[0], s_b_img_size[1])._render_image("img/"+theme+"/game_menu/surfaces/score.png", False, True),
-                "best_score_frame": Image(s_b_img_size[0], s_b_img_size[1])._render_image("img/"+theme+"/game_menu/surfaces/best_score.png", False, True),
-                "restart_msg_bg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/game_menu/surfaces/restart_msg_bg.png", False, True),
-                "how_to_play": Image(how_to_size[0], how_to_size[1])._render_image("img/"+theme+"/game_menu/surfaces/how_to_play.png", False, True),
-                "game_over_surf": Image(game_over_surf_size[0], game_over_surf_size[1])._render_image("img/"+theme+"/game_menu/surfaces/game_over.png", False, True),
-
-                "goal_sent_2048": Image(goal_sent_sizes[0][0], goal_sent_sizes[0][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_2048.png", False, True),
-                "goal_sent_4096": Image(goal_sent_sizes[1][0], goal_sent_sizes[1][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_4096.png", False, True),
-                "goal_sent_8192": Image(goal_sent_sizes[2][0], goal_sent_sizes[2][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_8192.png", False, True),
-                "goal_sent_16384": Image(goal_sent_sizes[3][0], goal_sent_sizes[3][1])._render_image("img/"+theme+"/game_menu/surfaces/goal_sent_16384.png", False, True)
+                "icon": Image(game_icon_size[0], game_icon_size[1])._render_image("img/"+theme+"/game_menu/surfaces/icon.png"),
+                "score_frame": Image(s_b_img_size[0], s_b_img_size[1])._render_image("img/"+theme+"/game_menu/surfaces/score.png"),
+                "best_score_frame": Image(s_b_img_size[0], s_b_img_size[1])._render_image("img/"+theme+"/game_menu/surfaces/best_score.png"),
+                "restart_msg_bg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/game_menu/surfaces/restart_msg_bg.png"),
+                "how_to_play": Image(how_to_size[0], how_to_size[1])._render_image("img/"+theme+"/game_menu/surfaces/how_to_play.png"),
             },
 
             "buttons": {
 
                 "home_btn": HUDButton(
-                    Image(home_btn_size[0], home_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/home_button.png", False, True),
+                    Image(home_btn_size[0], home_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/home_button.png"),
                     home_btn_pos,
-                    Image(home_btn_size[0], home_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/home_button_onHover.png", False, True)
+                    Image(home_btn_size[0], home_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/home_button_onHover.png")
                 ),
 
                 "new_game_long_btn": HUDButton(
-                    Image(long_restart_btn_size[0], long_restart_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_game_button.png", False, True),
+                    Image(long_restart_btn_size[0], long_restart_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_game_button.png"),
                     long_restart_btn_pos,
-                    Image(long_restart_btn_size[0], long_restart_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_game_button_onHover.png", False, True)
+                    Image(long_restart_btn_size[0], long_restart_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_game_button_onHover.png")
                 ),
 
                 "new_game_short_btn": HUDButton(
-                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_gm_button.png", False, True),
+                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_gm_button.png"),
                     new_game_btn_pos,
-                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_gm_button_onHover.png", False, True)
+                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/new_gm_button_onHover.png")
                 ),
 
                 "undo_btn": HUDButton(
-                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/undo_button.png", False, True),
+                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/undo_button.png"),
                     undo_btn_pos,
-                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/undo_button_onHover.png", False, True)
+                    Image(n_u_btn_size[0], n_u_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/undo_button_onHover.png")
                 ),
 
                 "try_again_btn": HUDButton(
-                    Image(try_again_btn_size[0], try_again_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/try_again_btn.png", False, True),
+                    Image(try_again_btn_size[0], try_again_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/try_again_btn.png"),
                     try_again_btn_pos,
-                    Image(try_again_btn_size[0], try_again_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/try_again_btn_onHover.png", False, True)
+                    Image(try_again_btn_size[0], try_again_btn_size[1])._render_image("img/"+theme+"/game_menu/buttons/try_again_btn_onHover.png")
                 )
             }
         },
@@ -489,42 +530,49 @@ def generate_theme_assets(theme):
 
             "surfaces": {
 
-                "menu_bg": Image(algo_menu_bg_size[0], algo_menu_bg_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/menu_surf.png", False, True),
+                "menu_bg": Image(algo_menu_bg_size[0], algo_menu_bg_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/menu_surf.png"),
                 "speed_bar": [
-                    Image(speed_bar_size[0], speed_bar_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/speed_bar.png", False, True),
-                    Image(speed_bar_size[0], speed_bar_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/speed_bar_scroll.png", False, True)
+                    Image(speed_bar_size[0], speed_bar_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/speed_bar.png"),
+                    Image(speed_bar_size[0], speed_bar_size[1])._render_image("img/"+theme+"/algo_menu/surfaces/speed_bar_scroll.png")
                 ]
             },
 
             "buttons": {
 
                 "ai_menu_btn": HUDButton(
-                    Image(ai_menu_btn_size[0], ai_menu_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/ai_menu_button.png", False, True),
+                    Image(ai_menu_btn_size[0], ai_menu_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/ai_menu_button.png"),
                     ai_menu_btn_pos,
-                    Image(ai_menu_btn_size[0], ai_menu_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/ai_menu_button_onHover.png", False, True)
+                    Image(ai_menu_btn_size[0], ai_menu_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/ai_menu_button_onHover.png")
                 ),
 
                 "auto_run_btn": HUDButton(
-                    Image(auto_run_btn_size[0], auto_run_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/auto_run_btn.png", False, True),
+                    Image(auto_run_btn_size[0], auto_run_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/auto_run_btn.png"),
                     auto_run_btn_pos,
-                    Image(auto_run_btn_size[0], auto_run_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/auto_run_btn_onHover.png", False, True)
+                    Image(auto_run_btn_size[0], auto_run_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/auto_run_btn_onHover.png")
                 ),
 
                 "stop_btn": HUDButton(
-                    Image(stop_btn_size[0], stop_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/stop_btn.png", False, True),
+                    Image(stop_btn_size[0], stop_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/stop_btn.png"),
                     stop_btn_pos,
-                    Image(stop_btn_size[0], stop_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/stop_btn_onHover.png", False, True)
+                    Image(stop_btn_size[0], stop_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/stop_btn_onHover.png")
+                ), 
+
+                "add_algo_btn": HUDButton(
+                    Image(add_algo_btn_size[0], add_algo_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/add_algo_btn.png"),
+                    add_algo_btn_pos,
+                    Image(add_algo_btn_size[0], add_algo_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/add_algo_btn_onHover.png")
                 ), 
 
                 "step_btn": HUDButton(
-                    Image(step_btn_size[0], step_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/step_btn.png", False, True),
+                    Image(step_btn_size[0], step_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/step_btn.png"),
                     step_btn_pos,
-                    Image(step_btn_size[0], step_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/step_btn_onHover.png", False, True)
+                    Image(step_btn_size[0], step_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/step_btn_onHover.png")
                 ),
+
                 "speed_bar_btn": [
-                    Image(speed_bar_btn_size[0], speed_bar_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/speed_bar_btn.png", False, True),
-                    Image(speed_bar_btn_size[0], speed_bar_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/speed_bar_btn_onHover.png", False, True)
-                ]            
+                    Image(speed_bar_btn_size[0], speed_bar_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/speed_bar_btn.png"),
+                    Image(speed_bar_btn_size[0], speed_bar_btn_size[1])._render_image("img/"+theme+"/algo_menu/buttons/speed_bar_btn_onHover.png")
+                ],
             }
         },
 
@@ -532,103 +580,118 @@ def generate_theme_assets(theme):
 
             "surfaces": {
 
-                "delete_board_bg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/delete_b_data_bg.png", False, True),
+                "delete_board_bg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/delete_b_data_bg.png"),
 
                 # backgrounds (board question and notification)
-                "3x3_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/3x3_b_msg_bg.png", False, True),
-                "4x4_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/4x4_b_msg_bg.png", False, True),
-                "5x5_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/5x5_b_msg_bg.png", False, True),
-                "all_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/every_b_msg_bg.png", False, True),
+                "3x3_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/3x3_b_msg_bg.png"),
+                "4x4_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/4x4_b_msg_bg.png"),
+                "5x5_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/5x5_b_msg_bg.png"),
+                "all_board_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/every_b_msg_bg.png"),
 
-                "3x3_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/3x3_not_msg_bg.png", False, True),
-                "4x4_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/4x4_not_msg_bg.png", False, True),
-                "5x5_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/5x5_not_msg_bg.png", False, True),
-                "all_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/every_not_msg_bg.png", False, True),
+                "3x3_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/3x3_not_msg_bg.png"),
+                "4x4_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/4x4_not_msg_bg.png"),
+                "5x5_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/5x5_not_msg_bg.png"),
+                "all_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/board_messages/every_not_msg_bg.png"),
 
 
-                "reset_b_sc_bg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/reset_b_sc_bg.png", False, True),
+                "reset_b_sc_bg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/reset_b_sc_bg.png"),
 
                 # backgrounds (best score question and notification)
-                "3x3_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/3x3_b_sc_msg_bg.png", False, True),
-                "4x4_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/4x4_b_sc_msg_bg.png", False, True),
-                "5x5_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/5x5_b_sc_msg_bg.png", False, True),
-                "all_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/every_b_sc_msg_bg.png", False, True),
+                "3x3_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/3x3_b_sc_msg_bg.png"),
+                "4x4_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/4x4_b_sc_msg_bg.png"),
+                "5x5_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/5x5_b_sc_msg_bg.png"),
+                "all_b_sc_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/every_b_sc_msg_bg.png"),
 
-                "3x3_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/3x3_not_msg_bg.png", False, True),
-                "4x4_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/4x4_not_msg_bg.png", False, True),
-                "5x5_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/5x5_not_msg_bg.png", False, True),
-                "all_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/every_not_msg_bg.png", False, True),
+                "3x3_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/3x3_not_msg_bg.png"),
+                "4x4_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/4x4_not_msg_bg.png"),
+                "5x5_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/5x5_not_msg_bg.png"),
+                "all_b_sc_not_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/best_score_messages/every_not_msg_bg.png"),
 
-                "sett_bg": Image(width, height)._render_image("img/"+theme+"/settings/surfaces/sett_menu_bg.png", False, True),
-                "made_by": Image(made_by_size[0], made_by_size[1])._render_image("img/"+theme+"/settings/surfaces/made_by.png", False, True)
+                "sett_bg": Image(width, height)._render_image("img/"+theme+"/settings/surfaces/sett_menu_bg.png"),
+
+                "stats_bg": Image(width, height)._render_image("img/"+theme+"/settings/surfaces/stats_bg.png"),
+                "reset_stats_msg": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/reset_stats_msg_bg.png"),
+                "reset_not_possible": Image(restart_window_size[0], restart_window_size[1])._render_image("img/"+theme+"/settings/surfaces/reset_not_possible.png"),
             },
 
             "buttons": {
 
+                "stats_btn": HUDButton(
+                    Image(statistics_btn_size[0], statistics_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/stats_button.png"),
+                    statistics_btn_pos,
+                    Image(statistics_btn_size[0], statistics_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/stats_button_onHover.png")
+                ),
+
                 "boards_delete_btn": HUDButton(
-                    Image(boards_delete_btn_size[0], boards_delete_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_boards_button.png", False, True),
+                    Image(boards_delete_btn_size[0], boards_delete_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_boards_button.png"),
                     boards_delete_btn_pos,
-                    Image(boards_delete_btn_size[0], boards_delete_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_boards_button_onHover.png", False, True)
+                    Image(boards_delete_btn_size[0], boards_delete_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_boards_button_onHover.png")
                 ),
 
                 "best_score_reset_btn": HUDButton(
-                    Image(reset_b_score_btn_size[0], reset_b_score_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_b_sc_button.png", False, True),
+                    Image(reset_b_score_btn_size[0], reset_b_score_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_b_sc_button.png"),
                     reset_b_score_btn_pos,
-                    Image(reset_b_score_btn_size[0], reset_b_score_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_b_sc_button_onHover.png", False, True)
+                    Image(reset_b_score_btn_size[0], reset_b_score_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_b_sc_button_onHover.png")
                 ),
 
                 "3x3_reset_btn": HUDButton(
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/3x3_reset_button.png", False, True),
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/3x3_reset_button.png"),
                     reset_btns_pos1,
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/3x3_reset_button_onHover.png", False, True)
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/3x3_reset_button_onHover.png")
                 ),
 
                 "4x4_reset_btn": HUDButton(
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/4x4_reset_button.png", False, True),
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/4x4_reset_button.png"),
                     reset_btns_pos2,
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/4x4_reset_button_onHover.png", False, True)
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/4x4_reset_button_onHover.png")
                 ),
 
                 "5x5_reset_btn": HUDButton(
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/5x5_reset_button.png", False, True),
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/5x5_reset_button.png"),
                     reset_btns_pos3,
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/5x5_reset_button_onHover.png", False, True)
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/5x5_reset_button_onHover.png")
                 ),
 
                 "all_reset_btn": HUDButton(
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/all_reset_button.png", False, True),
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/all_reset_button.png"),
                     reset_btns_pos4,
-                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/all_reset_button_onHover.png", False, True)
+                    Image(reset_btns_size[0], reset_btns_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/all_reset_button_onHover.png")
                 ),
 
                 "yes_btn": HUDButton(
-                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/yes_button.png", False, True),
+                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/yes_button.png"),
                     yes_btn_pos,
-                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/yes_button_onHover.png", False, True)
+                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/yes_button_onHover.png")
                 ),
 
                 "no_btn": HUDButton(
-                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/no_button.png", False, True),
+                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/no_button.png"),
                     no_btn_pos,
-                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/no_button_onHover.png", False, True)
+                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/no_button_onHover.png")
                 ),
 
                 "ok_btn": HUDButton(
-                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/ok_button.png", False, True),
+                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/ok_button.png"),
                     ok_btn_pos,
-                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/ok_button_onHover.png", False, True)
+                    Image(btn_size[0], btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/ok_button_onHover.png")
                 ),
 
                 "back_home_btn": HUDButton(
-                    Image(back_btn_size[0], back_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/back_button.png", False, True),
+                    Image(back_btn_size[0], back_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/back_button.png"),
                     back_btn_pos,
-                    Image(back_btn_size[0], back_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/back_button_onHover.png", False, True)
+                    Image(back_btn_size[0], back_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/back_button_onHover.png")
                 ),
 
-                "quit_btn": HUDButton(
-                    Image(quit_btn_size[0], quit_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/quit_btn.png", False, True),
-                    quit_btn_pos,
-                    Image(quit_btn_size[0], quit_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/quit_btn_onHover.png", False, True)
+                "reset_stats_btn": HUDButton(
+                    Image(reset_stats_btn_size[0], reset_stats_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_stats_button.png"),
+                    reset_stats_btn_pos,
+                    Image(reset_stats_btn_size[0], reset_stats_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/reset_stats_button_onHover.png")
+                ),
+
+                "info_stats_btn": HUDButton(
+                    Image(info_btn_size[0], info_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/info_btn.png"),
+                    info_btn_size,
+                    Image(info_btn_size[0], info_btn_size[1])._render_image("img/"+theme+"/settings/buttons/menu_buttons/info_btn_onHover.png")
                 )
             }
         }
@@ -637,7 +700,7 @@ def generate_theme_assets(theme):
     return theme_assets
 
 
-############ every game surface/image/button ############
+############ all surfaces ############
 
 game_assets = {
 
@@ -646,48 +709,3 @@ game_assets = {
     "dark_theme": generate_theme_assets("dark_theme")
 }
 
-
-
-
-
-
-'''# menu for algorithms
-algo_menu_size = (450, 400)
-algo_menu_pos = [[0, height-32], [0, height-algo_menu_size[1]]]
-
-caption_size = (290, 70)
-caption_pos = [80, 385]
-
-algo_menu = {
-    "unfolded": HUDButton(Image(algo_menu_size[0], algo_menu_size[1])._render_image("img/temp_theme/in_game/algo_menu/algo_menu_surf_1.png", False, True), algo_menu_pos[0]),
-    "collapsed": HUDButton(Image(algo_menu_size[0], algo_menu_size[1])._render_image("img/temp_theme/in_game/algo_menu/algo_menu_surf_2.png", False, True), algo_menu_pos[1]),
-    "caption": Image(caption_size[0], caption_size[1])._render_image("img/temp_theme/in_game/algo_menu/algo_menu_caption.png", False, True)
-}
-
-algo_menu_btn_size = (220, 65)
-
-nn_btn_pos = [115, 470]
-exp_btn_pos = [115, 535]
-greedy_btn_pos = [115, 600]
-random_btn_pos = [115, 665]
-
-algo_btn_images = [
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/neural_network_btn.png", False, True),
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/neural_network_btn_onHover.png", False, True),
-
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/expectimax_btn.png", False, True),
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/expectimax_btn_onHover.png", False, True),
-
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/greedy_btn.png", False, True),
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/greedy_btn_onHover.png", False, True),
-
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/random_btn.png", False, True),
-    Image(algo_menu_btn_size[0], algo_menu_btn_size[1])._render_image("img/temp_theme/in_game/algo_menu/buttons/random_btn_onHover.png", False, True),
-]
-
-algo_menu_buttons = {
-    "nn_btn": HUDButton(algo_btn_images[0], nn_btn_pos, algo_btn_images[1]),
-    "exp_btn": HUDButton(algo_btn_images[2], exp_btn_pos, algo_btn_images[3]),
-    "greedy_btn": HUDButton(algo_btn_images[4], greedy_btn_pos, algo_btn_images[5]),
-    "random_btn": HUDButton(algo_btn_images[6], random_btn_pos, algo_btn_images[7]),
-}'''
