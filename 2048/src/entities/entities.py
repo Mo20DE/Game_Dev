@@ -360,7 +360,7 @@ class Algorithms:
 
         if depth == 0:
             # evaluate leafs of game-tree
-            return self.eval_board(board)
+            return self.evaluate_state(board)
 
         total_score = 0
         free_tiles = self.get_free_fields(board)
@@ -396,6 +396,67 @@ class Algorithms:
                 result += board[i][j] * self.weight_mat[dim][i][j]
 
         return result
+    
+    def evaluate_state(self, state):
+        """
+        This function evaluates a board state based on several metrics:
+        1. The max-tile should be in a corner.
+        2. Tiles should be arranged in a monotonous manner.
+        3. Many empty cells are preferred -> low risk of getting stuck.
+        Optional:
+        4. Prefer smooth boards -> tile with similar values arranged adjacently.
+        """
+
+        MONOTONICITY_WEIGHT = 0.5
+        EMPTY_CELLS_WEIGHT = 10.0
+
+        n = state.shape[0]
+        empty_cells = 0
+        monotonicity = 0.0
+        smoothness = 0.0
+
+        left_to_right = 0
+        right_to_left = 0
+        top_to_bottom = 0
+        bottom_to_top = 0
+
+        for i in range(n):
+            for j in range(n):
+                if state[i, j] == 0:
+                    empty_cells += 1
+
+                if j < n - 1:
+                    smoothness -= abs(state[i, j] - state[i, j+1])
+                    if state[i, j] > state[i, j+1]:
+                        left_to_right += 1
+                    elif state[i, j] < state[i, j+1]:
+                        right_to_left += 1
+                    else:
+                        left_to_right += 1
+                        right_to_left += 1
+
+                if i < n - 1:
+                    smoothness -= abs(state[i, j] - state[i+1, j])
+                    if state[i, j] > state[i+1, j]:
+                        top_to_bottom += 1
+                    elif state[i, j] < state[i+1, j]:
+                        bottom_to_top += 1
+                    else:
+                        top_to_bottom += 1
+                        bottom_to_top += 1
+
+        max_log_tile = np.log2(state.max())
+        monotonicity = max(left_to_right + bottom_to_top, right_to_left + bottom_to_top, 
+                        right_to_left + top_to_bottom, left_to_right + top_to_bottom)
+
+        is_corner = state[0, 0] == state.max() or state[3, 0] == state.max() or \
+                    state[0, 3] == state.max() or state[3, 3] == state.max()
+
+        utility = (monotonicity * MONOTONICITY_WEIGHT +
+                smoothness / max_log_tile +
+                empty_cells * EMPTY_CELLS_WEIGHT)
+
+        return utility
     
     def greedyStrategy(self, board, depth):
 
