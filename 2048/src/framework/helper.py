@@ -250,7 +250,7 @@ class CodeEditor:
         self.code = self.editor.toPlainText()
         print(self.code)
 
-        f = open("/Users/mzm/Desktop/github/Game_Dev/2048/src/entities/custom_algo.py", "a")
+        f = open("src/entities/custom_algo.py", "a")
         f.truncate(0)
         
         f.write(self.code)

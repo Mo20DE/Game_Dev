@@ -1,0 +1,7 @@
+numpy==2.1.2
+pygame==2.5.2
+pygame_ce==2.3.2
+pyqode.json==2.10.0
+pyqode.qt==2.10.0
+PyQt5==5.15.11
+PyQt5_sip==12.15.0
