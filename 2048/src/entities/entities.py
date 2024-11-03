@@ -360,7 +360,7 @@ class Algorithms:
 
         if depth == 0:
             # evaluate leafs of game-tree
-            return self.evaluate_state(board)
+            return self.eval_board(board)
 
         total_score = 0
         free_tiles = self.get_free_fields(board)
@@ -368,7 +368,6 @@ class Algorithms:
 
             board[free_tile[0], free_tile[1]] = 2
             total_score += 0.1 * self.compute_move_score(board, depth-1)
-            board[free_tile[0], free_tile[1]] = 0
             board[free_tile[0], free_tile[1]] = 4
             total_score += 0.9 * self.compute_move_score(board, depth-1)
             board[free_tile[0], free_tile[1]] = 0
@@ -377,6 +376,10 @@ class Algorithms:
     
     def compute_move_score(self, board, depth):
 
+        if depth == 0:
+            # evaluate leafs of game-tree
+            return self.eval_board(board)
+        
         best_score = -1
         for move in self.moves:
             b_copy = board.copy()

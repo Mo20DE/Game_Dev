@@ -1,7 +1,7 @@
 [
   {
     "3x3": 0,
-    "4x4": 0,
+    "4x4": 62032,
     "5x5": 0
   },
   {
@@ -11,7 +11,7 @@
   },
   {
     "3x3": "2048",
-    "4x4": "2048",
+    "4x4": "8192",
     "5x5": "2048"
   },
   {
@@ -19,6 +19,6 @@
     "show_undo": true,
     "show_ai_menu": true,
     "how_to": true,
-    "theme": "dark_theme"
+    "theme": "light_theme"
   }
 ]

@@ -1,7 +1,7 @@
 [
   [
     450,
-    550
+    1450
   ],
   {
     "3x3": {
@@ -46,7 +46,7 @@
         "bold": true
       },
       "Best Score": {
-        "score": 27252,
+        "score": 62032,
         "x": 40,
         "y": 240,
         "font": "Arial",
@@ -54,7 +54,7 @@
         "bold": false
       },
       "Total Score": {
-        "score": 1036,
+        "score": 131724,
         "x": 40,
         "y": 280,
         "font": "Arial",
@@ -62,7 +62,7 @@
         "bold": false
       },
       "Top Tile": {
-        "score": 128,
+        "score": 4096,
         "x": 40,
         "y": 320,
         "font": "Arial",
@@ -76,7 +76,7 @@
         "f_size": 22,
         "bold": true,
         "Games Reached": {
-          "score": 22,
+          "score": 252,
           "x": 40,
           "y": 420,
           "font": "Arial",
@@ -92,9 +92,164 @@
           "bold": false
         },
         "Fewest Moves": {
-          "score": 72,
+          "score": 62,
           "x": 40,
           "y": 500,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        }
+      },
+      "256": {
+        "x": 40,
+        "y": 560,
+        "font": "Arial",
+        "f_size": 22,
+        "bold": true,
+        "Games Reached": {
+          "score": 406,
+          "x": 40,
+          "y": 600,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Shortest Time": {
+          "score": "0:12",
+          "x": 40,
+          "y": 640,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Fewest Moves": {
+          "score": 115,
+          "x": 40,
+          "y": 680,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        }
+      },
+      "512": {
+        "x": 40,
+        "y": 740,
+        "font": "Arial",
+        "f_size": 22,
+        "bold": true,
+        "Games Reached": {
+          "score": 758,
+          "x": 40,
+          "y": 780,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Shortest Time": {
+          "score": "0:22",
+          "x": 40,
+          "y": 820,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Fewest Moves": {
+          "score": 254,
+          "x": 40,
+          "y": 860,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        }
+      },
+      "1024": {
+        "x": 40,
+        "y": 920,
+        "font": "Arial",
+        "f_size": 22,
+        "bold": true,
+        "Games Reached": {
+          "score": 1320,
+          "x": 40,
+          "y": 960,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Shortest Time": {
+          "score": "0:36",
+          "x": 40,
+          "y": 1000,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Fewest Moves": {
+          "score": 486,
+          "x": 40,
+          "y": 1040,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        }
+      },
+      "2048": {
+        "x": 40,
+        "y": 1100,
+        "font": "Arial",
+        "f_size": 22,
+        "bold": true,
+        "Games Reached": {
+          "score": 1902,
+          "x": 40,
+          "y": 1140,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Shortest Time": {
+          "score": "0:56",
+          "x": 40,
+          "y": 1180,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Fewest Moves": {
+          "score": 936,
+          "x": 40,
+          "y": 1220,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        }
+      },
+      "4096": {
+        "x": 40,
+        "y": 1280,
+        "font": "Arial",
+        "f_size": 22,
+        "bold": true,
+        "Games Reached": {
+          "score": 1413,
+          "x": 40,
+          "y": 1320,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Shortest Time": {
+          "score": "1:42",
+          "x": 40,
+          "y": 1360,
+          "font": "Arial",
+          "f_size": 22,
+          "bold": false
+        },
+        "Fewest Moves": {
+          "score": 1892,
+          "x": 40,
+          "y": 1400,
           "font": "Arial",
           "f_size": 22,
           "bold": false
@@ -104,7 +259,7 @@
     "5x5": {
       "All Play - 5x5": {
         "x": 40,
-        "y": 560,
+        "y": 1460,
         "font": "Arial",
         "f_size": 22,
         "bold": true
@@ -112,7 +267,7 @@
       "Best Score": {
         "score": 0,
         "x": 40,
-        "y": 600,
+        "y": 1500,
         "font": "Arial",
         "f_size": 22,
         "bold": false
@@ -120,7 +275,7 @@
       "Total Score": {
         "score": 0,
         "x": 40,
-        "y": 640,
+        "y": 1540,
         "font": "Arial",
         "f_size": 22,
         "bold": false
@@ -128,7 +283,7 @@
       "Top Tile": {
         "score": 0,
         "x": 40,
-        "y": 680,
+        "y": 1580,
         "font": "Arial",
         "f_size": 22,
         "bold": false

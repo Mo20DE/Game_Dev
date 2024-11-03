@@ -1,7 +1,7 @@
 from framework.static import *
 from entities.entities import Algorithms
 from framework.utils import Keys, ButtonsRow, SpeedBar
-from framework.helper import CodeEditor
+# from framework.helper import CodeEditor
 from entities.custom_algo import custom_algo
 
 
@@ -25,7 +25,7 @@ class AlgoMenu:
         # class that includes algorithms for solving the puzzle
         self.algos = Algorithms()
         # class that represents a code editor
-        self.code_editor = CodeEditor()
+        # self.code_editor = CodeEditor()
     
     def load_menu_variables(self, theme, load_vars=True):
 
@@ -96,7 +96,8 @@ class AlgoMenu:
             if not self.auto_run :
 
                 if self.buttons["add_algo_btn"].isBtnClicked(mPos):
-                    self.code_editor.run_code_editor()
+                    # self.code_editor.run_code_editor()
+                    pass
 
                 elif self.buttons["step_btn"].isBtnClicked(mPos):
 
@@ -137,11 +138,12 @@ class AlgoMenu:
             # custom algorithm:
             if self.toggle_btn_row.active_btn == 0:
                 
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = exec(self.code_editor.code)
+                # self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = exec(self.code_editor.code)
+                pass
             
             # expectimax algorithm
             elif self.toggle_btn_row.active_btn == 1:
-                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.algos.smartStrategy(board, 2)
+                self.gameM.game_ent.boards[self.gameM.game_ent.mode].curr_move = self.algos.smartStrategy(board, 3)
 
             # greedy algorithm
             elif self.toggle_btn_row.active_btn == 2:

@@ -32,7 +32,6 @@ def load_board_data(path_name, theme):
                         #     [4, 16, 32, 128],
                         #     [0, 2, 4, 8]
                         # ])
-                        print("TEST")
                         # add board tiles
                         new_board.board_tiles = {
                             tile_idx: BoardTile(
@@ -211,53 +210,53 @@ def save_stats(path_name, stats):
 
 ## helper functions for custom algorithm integration ##
 
-import logging
-logging.basicConfig()
-# optionally, set the qt api to use (in ['pyqt4', 'pyqt5', 'pyside'])
-# import os; os.environ['QT_API'] = 'pyside'
-import sys
-from pyqode.qt import QtWidgets
-from pyqode.python.backend import server
-from pyqode.python.widgets import PyCodeEdit
-from PyQt5.QtWidgets import QShortcut
-from PyQt5.QtGui import QKeySequence
+# import logging
+# logging.basicConfig()
+# # optionally, set the qt api to use (in ['pyqt4', 'pyqt5', 'pyside'])
+# # import os; os.environ['QT_API'] = 'pyside'
+# import sys
+# from pyqode.qt import QtWidgets
+# from pyqode.python.backend import server
+# from pyqode.python.widgets import PyCodeEdit
+# from PyQt5.QtWidgets import QShortcut
+# from PyQt5.QtGui import QKeySequence
 
-class CodeEditor:
+# class CodeEditor:
 
-    def __init__(self):
+#     def __init__(self):
 
-        self.app = QtWidgets.QApplication(sys.argv)
+#         self.app = QtWidgets.QApplication(sys.argv)
 
-        self.window = QtWidgets.QMainWindow()
-        self.window.setWindowTitle("Python Code Editor")
-        self.window.setFixedWidth(800)
-        self.window.setFixedHeight(600)
+#         self.window = QtWidgets.QMainWindow()
+#         self.window.setWindowTitle("Python Code Editor")
+#         self.window.setFixedWidth(800)
+#         self.window.setFixedHeight(600)
 
-        self.editor = PyCodeEdit(server_script=server.__file__, color_scheme='darcula')
-        self.editor.zoom_in(4)
-        self.editor.file.open('/Users/mzm/Desktop/github/Game_Dev/2048/src/entities/custom_algo.py')
+#         self.editor = PyCodeEdit(server_script=server.__file__, color_scheme='darcula')
+#         self.editor.zoom_in(4)
+#         self.editor.file.open('/Users/mzm/Desktop/github/Game_Dev/2048/src/entities/custom_algo.py')
 
-        self.window.setCentralWidget(self.editor)
+#         self.window.setCentralWidget(self.editor)
 
-        self.shortcut = QShortcut(QKeySequence("Ctrl+S"), self.editor)
-        self.shortcut.activated.connect(self.save_code)
+#         self.shortcut = QShortcut(QKeySequence("Ctrl+S"), self.editor)
+#         self.shortcut.activated.connect(self.save_code)
 
-        self.code = self.editor.toPlainText()
-        print(self.code)
+#         self.code = self.editor.toPlainText()
+#         print(self.code)
     
-    def save_code(self):
+#     def save_code(self):
 
-        self.code = self.editor.toPlainText()
-        print(self.code)
+#         self.code = self.editor.toPlainText()
+#         print(self.code)
 
-        f = open("src/entities/custom_algo.py", "a")
-        f.truncate(0)
+#         f = open("src/entities/custom_algo.py", "a")
+#         f.truncate(0)
         
-        f.write(self.code)
-        f.close()
+#         f.write(self.code)
+#         f.close()
     
-    def run_code_editor(self):
+#     def run_code_editor(self):
 
-        self.window.show()
-        self.app.exec_()
+#         self.window.show()
+#         self.app.exec_()
         
