@@ -141,7 +141,7 @@ class States:
     def __init__(self, gamestates):
 
         self.gamestates = gamestates
-        self.images = load_render_images_by_order(['home', 'restart'], 'images\states', False, True, 50, 50, None, 1)
+        self.images = load_render_images_by_order(['home', 'restart'], '../images/states', False, True, 50, 50, None, 1)
 
         self.states_buttons = {
             'home': HUD_Button(self.images[0], (465, 10)),
@@ -204,7 +204,7 @@ class Utility:
         super().__init__()
         pg.sprite.Sprite.__init__(self)
         self.col = False
-        self.sound_ball = pg.mixer.Sound("music/ball_sound.wav")
+        self.sound_ball = pg.mixer.Sound("../music/ball_sound.wav")
 
     # collision
     def check_collision(self, sprite1, sprite2):

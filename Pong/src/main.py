@@ -21,24 +21,24 @@ class Game:
         self.running = True
 
         # sound
-        self.music = Sound('music\_arcade_music.wav', 0.3)
+        self.music = Sound('../music/_arcade_music.wav', 0.3)
         self.music.play(None, None, -1)
         self.sound = SoundBar((20, 20), (250, 5), (360, 160), False, None, (0, 97, 255), None, BORDER_CLR, True, GREY)
         self.modeBar = ModeBar((360, 330), 3, (250, 5), (20, 20), None, (0, 97, 255), BORDER_CLR)
 
         # title image
-        self.titlescreen = Image(300, 90)._render_image('images\_title.png', False, True)
+        self.titlescreen = Image(300, 90)._render_image('../images/_title.png', False, True)
 
         # menu
         self.buttons = {
-            'play_0': HUD_Button(Image(135, 45)._render_image('images\_buttons\play_0.png', False, True), ((Width/2)-75, 220)),
-            'play_1': HUD_Button(Image(135, 45)._render_image('images\_buttons\play_1.png', False, True), ((Width/2)-75, 220)),
-            'option_0': HUD_Button(Image(135, 45)._render_image('images\_buttons\options_0.png', False, True), ((Width/2)-75, 295)),
-            'option_1': HUD_Button(Image(135, 45)._render_image('images\_buttons\options_1.png', False, True), ((Width/2)-75, 295)),
-            'exit_0': HUD_Button(Image(135, 45)._render_image('images\_buttons\exit_0.png', False, True), ((Width/2)-75, 370)),
-            'exit_1': HUD_Button(Image(135, 45)._render_image('images\_buttons\exit_1.png', False, True), ((Width/2)-75, 370)),
-            'back_0': HUD_Button(Image(135, 45)._render_image('images\_buttons\_back_0.png', False, True), (70, 450)),
-            'back_1': HUD_Button(Image(135, 45)._render_image('images\_buttons\_back_1.png', False, True), (70, 450))
+            'play_0': HUD_Button(Image(135, 45)._render_image('../images/_buttons/play_0.png', False, True), ((Width/2)-75, 220)),
+            'play_1': HUD_Button(Image(135, 45)._render_image('../images/_buttons/play_1.png', False, True), ((Width/2)-75, 220)),
+            'option_0': HUD_Button(Image(135, 45)._render_image('../images/_buttons/options_0.png', False, True), ((Width/2)-75, 295)),
+            'option_1': HUD_Button(Image(135, 45)._render_image('../images/_buttons/options_1.png', False, True), ((Width/2)-75, 295)),
+            'exit_0': HUD_Button(Image(135, 45)._render_image('../images/_buttons/exit_0.png', False, True), ((Width/2)-75, 370)),
+            'exit_1': HUD_Button(Image(135, 45)._render_image('../images/_buttons/exit_1.png', False, True), ((Width/2)-75, 370)),
+            'back_0': HUD_Button(Image(135, 45)._render_image('../images/_buttons/_back_0.png', False, True), (70, 450)),
+            'back_1': HUD_Button(Image(135, 45)._render_image('../images/_buttons/_back_1.png', False, True), (70, 450))
         }
         self.pic = ['play_0', 'option_0', 'exit_0', 'back_0']
 
